@@ -1,10 +1,10 @@
 EXE = mac.elf
 
-OBJ = main.o
-SRC = main.c
+OBJ = main.o mac.o
+SRC = main.c mac.c
 
 $(EXE) : $(OBJ)
-	gcc -o $(EXE) $^
+	gcc -o  $(EXE) $^
 
 %.o:%.c
 	gcc -c $< -o $@
