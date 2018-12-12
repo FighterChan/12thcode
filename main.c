@@ -20,16 +20,22 @@ int
 doit (char *text)
 {
 
-    printf("%s\n",text);
+    int ret;
+    int i = 0;
+    char tmp[1024];
+    char type[8];
+    memset (type, 0, sizeof(type));
     struct mac_in indata;
-    memset(&indata,0,sizeof(struct mac_in));
+    memset (&indata, 0, sizeof(struct mac_in));
+    for (i = 0;i < strlen (text);i++)
+        {
+            ret = sscanf (&text[i], "%*[^{]{%[^}]", tmp);
+            printf ("%s\n", tmp);
+            ret = sscanf (tmp, "%*%s", type);//sscanf全匹配试试
+            printf ("type:%s\n", type);
+            i++;
+        }
 
-    sscanf (text,"type:\"%s\",proto:\"%s\",source:\"%s\",fid:%dmacaddress:\"%s\",nexthoptype:\"%s\",nexthop:%d",
-            indata.type, indata.proto, indata.source, &indata.fid,
-            indata.macaddress, indata.nexthoptype, &indata.nexthop);
-    printf ("indata->fid = %d\n", indata.fid);
-    printf ("indata->nexthop = %d\n", indata.nexthop);
-    printf ("indata->macaddress = %s\n", indata.macaddress);
     return 0;
 }
 
@@ -41,7 +47,7 @@ dofile (char *filename)
     long len;
     char *data;
 
-    f = fopen (filename, "r");
+    f = fopen (filename, "rb");
     fseek (f, 0, SEEK_END);
     len = ftell (f);
     fseek (f, 0, SEEK_SET);
@@ -59,12 +65,13 @@ dofile (char *filename)
 int
 main (int argc, char **argv)
 {
-//    dofile (argv[1]);
-    char k1[16] = {0};
-    char k2[16] = {0};
-
-
-    sscanf("[ { key1: \"value1\"        \n key2: \"value2\"","%*s%*s%*s%s%*s%s",k1,k2);
-    printf("%s\n%s\n",k1,k2);
+    dofile (argv[1]);
+//    int day, year;
+//    char weekday[20], month[1024];
+//    char *dtm = " {type:\"ADD-MAC\",     proto: \"DOT1Q\",     source: \"MLAG\",     fid: 1024,    macaddress: \"0000.0000.0001\",     nexthoptype: \"INTERFACE\",     nexthop: 1  }";
+//    sscanf (dtm, "%*[^{]{%[^}]", month);
+//
+//    sscanf(month,"");
+//    printf ("%s\n", month);
     return 0;
 }
