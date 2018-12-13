@@ -8,6 +8,7 @@
 #ifndef MAC_H_
 #define MAC_H_
 #include "list.h"
+#include "jhash.h"
 
 #define MAX(X,Y) ((X)>(Y)?(X):(Y))
 
@@ -26,15 +27,6 @@
 #define VID_MAX 4094
 #define VNI_MIN 1
 #define VNI_MAX 16777215
-
-char *strproto[8] =
-    { "VXLAN", "DOT1Q" };
-
-char *strsource[8] =
-    { "STATIC", "LOCAL", "MLAG", "EVPN" };
-
-char *strnexthoptype[16] =
-    { "INTERFACE", "ESI" };
 
 struct mac_in
 {
@@ -67,5 +59,17 @@ struct esi
     char nexthopifx[NEXTHOPIFX_LEN];
     struct list_head list;
 };
+
+struct list_head mac_head;
+struct list_head int_head;
+struct list_head esi_head;
+
+
+int
+add_mac_in (struct mac_in *s);
+int
+check_mac_in (struct mac_in *p);
+u32
+get_mac_in_key (int fid, const char *mac_addr);
 
 #endif /* MAC_H_ */
