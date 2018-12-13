@@ -17,15 +17,18 @@
 
 struct list_head smac_head;
 struct list_head int_head;
+struct list_head esi_head;
 
 int
-parse_cmd (FILE *fp)
+parse_cmd (const char *path)
 {
     struct mac_in *pmac_in;
     struct int_out *pint_out;
+    struct esi *pesi;
 
     INIT_LIST_HEAD (&smac_head);
     INIT_LIST_HEAD (&int_head);
+    INIT_LIST_HEAD (&esi_head);
 
     int nRet;
     char type[64];
@@ -35,9 +38,17 @@ parse_cmd (FILE *fp)
     memset (&smac_in, 0, sizeof(struct mac_in));
     struct int_out sint_out;
     memset (&sint_out, 0, sizeof(struct int_out));
+    struct esi sesi;
+    memset (&sesi, 0, sizeof(struct esi));
+    FILE *fp;
+    fp = fopen (path, "rb");
+    if (!fp)
+        {
+            printf ("can not open!\n");
+            return -1;
+        }
     while (1)
         {
-
             nRet = fscanf (fp, "%s", type);
             if (nRet < 0)
                 {
@@ -127,13 +138,13 @@ parse_cmd (FILE *fp)
                         }
                     else if (strcmp (type, "\"ADD-ESI\",") == 0)
                         {
-//                            pmac_in = (struct mac_in *) malloc (
-//                                    sizeof(struct mac_in));
-//                            if (!pmac_in)
+//                            pesi = (struct esi *) malloc (
+//                                    sizeof(struct esi));
+//                            if (!pesi)
 //                                {
 //                                    return -1;
 //                                }
-//                            strcpy (pmac_in->type, "ADD-MAC");
+//                            strcpy (pesi->type, "ADD-ESI");
 //
 //                            nRet = fscanf (
 //                                    fp, "%*s%s %*s%s %*s%d, %*s%s %*s%s %*s%d",
@@ -189,14 +200,16 @@ main (int argc, char **argv)
 #if 0
     dotest();
 #else
-    FILE *infp;
-    infp = fopen (argv[1], "rb");
-    if (!infp)
+    if (argc != 2)
         {
-            printf ("can not open!\n");
+            printf ("parameter error!\n");
             return -1;
         }
-    parse_cmd (infp);
+    /*解析文件*/
+    parse_cmd (argv[1]);
+    /*处理*/
+
+
 #endif
     struct mac_in *p;
     list_for_each_entry(p,&smac_head,list)
@@ -219,6 +232,7 @@ main (int argc, char **argv)
             printf ("ifx:%d\n", p2->ifx);
             printf ("ifname:%s\n", p2->ifname);
             printf ("peerip:%s\n", p2->peerip);
+            printf ("-----------------------------\n");
         }
 
     return 0;
