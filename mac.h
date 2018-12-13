@@ -9,18 +9,6 @@
 #define MAC_H_
 #include "list.h"
 
-struct mac
-{
-    char type[16];
-    char proto[16];
-    char source[16];
-    char fid[16];
-    char macaddress[32];
-    char nexthoptype[32];
-    char nexthop[16]; /*取值范围[1~65535]*/
-    struct list_head list;
-};
-
 struct mac_in
 {
     char type[16];
