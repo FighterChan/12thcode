@@ -148,7 +148,7 @@ check_mac_in (struct mac_in *p)
 }
 
 int
-parse_cmd (const char *path)
+parse_cmd (FILE *fp)
 {
     struct mac_in *pmac_in;
     struct int_out *pint_out;
@@ -169,13 +169,6 @@ parse_cmd (const char *path)
     memset (&sint_out, 0, sizeof(struct int_out));
     struct esi sesi;
     memset (&sesi, 0, sizeof(struct esi));
-    FILE *fp;
-    fp = fopen (path, "rb");
-    if (!fp)
-        {
-            printf ("can not open!\n");
-            return -1;
-        }
     while (1)
         {
             nRet = fscanf (fp, "%s", type);
@@ -325,21 +318,28 @@ parse_cmd (const char *path)
 }
 
 int
-deal_with_cmd (const char *path)
+conver_filename (char *infile, char *outfile)
+{
+
+    char *token;
+    char *outpath = outfile;
+    if ((token = strsep (&infile, ".")) != NULL)
+        {
+            sprintf (outpath, "%s%s", token, "_result111.txt");
+        }
+    else
+        {
+            return -1;
+        }
+    return 0;
+}
+
+int
+deal_with_cmd (FILE *fp)
 {
     struct mac_in *pin;
     struct int_out *pout;
 
-    char outfile[16];
-    memset (outfile, 0, sizeof(outfile));
-    sprintf (outfile, "%s_result", path);
-    FILE *outfp;
-    outfp = fopen (outfile, "w");
-    if (!outfp)
-        {
-            printf ("can not open file!\n");
-            return -1;
-        }
 
     /*遍历int*/
     list_for_each_entry(pout,&int_head,list)
@@ -368,19 +368,37 @@ dotest ()
 int
 main (int argc, char **argv)
 {
-#if 0
-    dotest();
-#else
+    char outpath[32];
+    memset(outpath,0,sizeof(outpath));
+
     if (argc != 2)
         {
             printf ("parameter error!\n");
             return -1;
         }
+    FILE *infp;
+    infp = fopen (argv[1], "rb");
+    if (!infp)
+        {
+            printf ("can not open!\n");
+            return -1;
+        }
+
     /*解析文件*/
-    parse_cmd (argv[1]);
+    parse_cmd (infp);
+    fclose(infp);
     /*处理*/
-//    deal_with_cmd (argv[1]);
-#endif
+    conver_filename(argv[1],outpath);
+    FILE *outfp;
+    outfp = fopen (outpath, "w");
+    if (!outfp)
+        {
+            printf ("can not open file!\n");
+            return -1;
+        }
+    deal_with_cmd (outfp);
+    fclose(outfp);
+//    list_free();
     struct mac_in *p;
     list_for_each_entry(p,&mac_head,list)
         {
