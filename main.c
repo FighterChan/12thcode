@@ -245,7 +245,7 @@ parse_cmd (FILE *fp)
                                     pmac_in->priority = st_priority;
                                 }
 
-                            list_add (&pmac_in->list, &mac_head);
+                            list_add_tail (&pmac_in->list, &mac_head);
 
                         }
                     else if (strcmp (type, "\"ADD-INT\",") == 0)
@@ -293,7 +293,7 @@ parse_cmd (FILE *fp)
                                     continue;
                                 }
 
-                            list_add (&pint_out->list, &int_head);
+                            list_add_tail (&pint_out->list, &int_head);
 
                         }
                     else if (strcmp (type, "\"ADD-ESI\",") == 0)
@@ -385,7 +385,7 @@ deal_with_cmd (FILE *fp)
                                                 {
                                                     fprintf (fp,
                                                              "%d/%d %s %s %s\n",
-                                                             pin->fid,
+                                                             tmp->val,
                                                              tmp->type,
                                                              pin->macaddress,
                                                              pin->source,
@@ -395,7 +395,7 @@ deal_with_cmd (FILE *fp)
                                                 {
                                                     fprintf (fp,
                                                              "%d/%d %s %s %s\n",
-                                                             pin->fid,
+                                                             tmp->val,
                                                              tmp->type,
                                                              pin->macaddress,
                                                              pin->source,
@@ -436,7 +436,7 @@ deal_with_cmd (FILE *fp)
                                                     fprintf (
                                                             fp,
                                                             "%d/%d %s %s %s %d\n",
-                                                            pin->fid, tmp->type,
+                                                            tmp->val, tmp->type,
                                                             pin->macaddress,
                                                             pin->source,
                                                             pout->ifname,
@@ -447,7 +447,7 @@ deal_with_cmd (FILE *fp)
                                                     fprintf (
                                                             fp,
                                                             "%d/%d %s %s %s %d\n",
-                                                            pin->fid, tmp->type,
+                                                            tmp->val, tmp->type,
                                                             pin->macaddress,
                                                             pin->source,
                                                             pout->peerip,
