@@ -19,6 +19,8 @@ struct list_head mac_head;
 struct list_head int_head;
 struct list_head esi_head;
 
+static int st_priority = 1;
+
 struct mac_type
 {
     char type;
@@ -49,25 +51,24 @@ mac_type2fid (struct mac_type *p)
     return ((p->type << 24) | (p->val & 0xffffff));
 }
 
-struct mac_type *
-fid2mac_type (int fid)
+int
+fid2mac_type (int fid, struct mac_type **tmp)
 {
     int nRet;
-    struct mac_type *tmp;
-    tmp = (struct mac_type *) malloc (sizeof(struct mac_type));
-    if (!tmp)
+    *tmp = (struct mac_type *) malloc (sizeof(struct mac_type));
+    if (!(*tmp))
         {
-            printf("struct mac_type malloc 失败!\n");
-            return NULL;
+            printf ("struct mac_type malloc 失败!\n");
+            return -1;
         }
-    tmp->type = (char) (fid >> 24);
-    tmp->val = (fid & 0xffffff);
-    nRet = mac_type2fid (tmp);
+    (*tmp)->type = (char) (fid >> 24);
+    (*tmp)->val = (fid & 0xffffff);
+    nRet = mac_type2fid (*tmp);
     if (nRet < 0)
         {
-            return NULL;
+            return -2;
         }
-    return tmp;
+    return 0;
 }
 
 int
@@ -84,13 +85,13 @@ int
 check_mac_in (struct mac_in *p)
 {
     int valid;
-
     valid = 0;
+    struct mac_type *tmp;
     /*检查fid是否合法*/
-    struct mac_type *val1;
-    val1 = fid2mac_type (p->fid);
-    if (!val1)
+    valid = fid2mac_type (p->fid, &tmp);
+    if (valid == -2)
         {
+            free (tmp);
             return -1;
         }
     /*检查proto是否合法*/
@@ -222,6 +223,18 @@ parse_cmd (FILE *fp)
                                     continue;
                                 }
 
+                            if (strcmp (pmac_in->source, "STATIC") == 0)
+                                {
+                                    /*不存在多个STATIC的情况*/
+                                    pmac_in->priority = 0;
+                                }
+                            else
+                                {
+                                    /*判断优先级*/
+                                    st_priority++;
+                                    pmac_in->priority = st_priority;
+                                }
+
                             list_add_tail (&pmac_in->list, &mac_head);
 
                         }
@@ -262,9 +275,9 @@ parse_cmd (FILE *fp)
                                             sint_out.peerip + 1,
                                             strlen (sint_out.peerip) - 2);
                                 }
-                           /*检查ifx是否合法*/
-                            valid = check_ifx_nexthop(pint_out->ifx);
-                            if(valid < 0)
+                            /*检查ifx是否合法*/
+                            valid = check_ifx_nexthop (pint_out->ifx);
+                            if (valid < 0)
                                 {
                                     valid = 0;
                                     continue;
@@ -339,15 +352,19 @@ deal_with_cmd (FILE *fp)
 {
     struct mac_in *pin;
     struct int_out *pout;
-
-
+    struct mac_type tmp;
+    memset (&tmp, 0, sizeof(struct mac_type));
     /*遍历int*/
     list_for_each_entry(pout,&int_head,list)
         {
-//            if (strcmp (pout->type) == 0)
-//                {
-//
-//                }
+            list_for_each_entry(pin,&mac_head,list)
+                {
+                    /*接口出口存在的时候才可连接*/
+                    if (pout->ifname && pout->ifx && pout->ifx == pin->nexthop)
+                        {
+//                            fid2mac_type(pin->fid);
+                        }
+                }
         }
     return 0;
 }
@@ -369,7 +386,7 @@ int
 main (int argc, char **argv)
 {
     char outpath[32];
-    memset(outpath,0,sizeof(outpath));
+    memset (outpath, 0, sizeof(outpath));
 
     if (argc != 2)
         {
@@ -386,9 +403,9 @@ main (int argc, char **argv)
 
     /*解析文件*/
     parse_cmd (infp);
-    fclose(infp);
+    fclose (infp);
     /*处理*/
-    conver_filename(argv[1],outpath);
+    conver_filename (argv[1], outpath);
     FILE *outfp;
     outfp = fopen (outpath, "w");
     if (!outfp)
@@ -397,7 +414,7 @@ main (int argc, char **argv)
             return -1;
         }
     deal_with_cmd (outfp);
-    fclose(outfp);
+    fclose (outfp);
 //    list_free();
     struct mac_in *p;
     list_for_each_entry(p,&mac_head,list)

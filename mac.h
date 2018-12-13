@@ -43,6 +43,7 @@ struct mac_in
     char macaddress[MACADDRESS_LEN];
     char nexthoptype[NEXTHOPTYPE_LEN];
     int nexthop; /*取值范围[1~65535]*/
+    int priority; /*越大越优先*/
     struct list_head list;
 };
 
