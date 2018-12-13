@@ -66,7 +66,8 @@ fid2mac_type (int fid, struct mac_type **tmp)
     nRet = mac_type2fid (*tmp);
     if (nRet < 0)
         {
-            return -2;
+            /*内存申请成功，但是mac_type2fid返回数据不合法*/
+            return 1;
         }
     return 0;
 }
@@ -94,6 +95,13 @@ check_mac_in (struct mac_in *p)
             free (tmp);
             return -1;
         }
+    if (valid == -1)
+        {
+            printf ("fid2mac_type malloc error!\n");
+            return -1;
+        }
+    /*成功也得释放*/
+    free (tmp);
     /*检查proto是否合法*/
     int i;
     for (i = 0; i < sizeof(strproto) / sizeof(strproto[0]); i++)
@@ -190,6 +198,8 @@ parse_cmd (FILE *fp)
                                 {
                                     return -1;
                                 }
+                            pmac_in->priority = 0;
+
                             strcpy (pmac_in->type, "ADD-MAC");
 
                             nRet = fscanf (
@@ -226,7 +236,7 @@ parse_cmd (FILE *fp)
                             if (strcmp (pmac_in->source, "STATIC") == 0)
                                 {
                                     /*不存在多个STATIC的情况*/
-                                    pmac_in->priority = 0;
+//                                    pmac_in->priority = 0;
                                 }
                             else
                                 {
@@ -235,7 +245,7 @@ parse_cmd (FILE *fp)
                                     pmac_in->priority = st_priority;
                                 }
 
-                            list_add_tail (&pmac_in->list, &mac_head);
+                            list_add (&pmac_in->list, &mac_head);
 
                         }
                     else if (strcmp (type, "\"ADD-INT\",") == 0)
@@ -283,7 +293,7 @@ parse_cmd (FILE *fp)
                                     continue;
                                 }
 
-                            list_add_tail (&pint_out->list, &int_head);
+                            list_add (&pint_out->list, &int_head);
 
                         }
                     else if (strcmp (type, "\"ADD-ESI\",") == 0)
@@ -350,11 +360,63 @@ conver_filename (char *infile, char *outfile)
 int
 deal_with_cmd (FILE *fp)
 {
-    struct mac_in *pin;
-    struct int_out *pout;
-    struct mac_type tmp;
+    struct mac_in *pin, *nin;
+    struct int_out *pout, *nout;
+    int list_max = 0;
+
+    struct mac_type *tmp;
+    int nRet = 0;
     memset (&tmp, 0, sizeof(struct mac_type));
     /*遍历int*/
+    list_for_each_entry_safe(pout,nout,&int_head,list)
+        {
+            list_for_each_entry_safe(pin,nin,&mac_head,list)
+                {
+                    /*接口出口存在的时候才可连接*/
+                    if (pout->ifname && pout->ifx && pout->ifx == pin->nexthop)
+                        {
+                            nRet = fid2mac_type (pin->fid, &tmp);
+                            if (nRet >= 0)
+                                {
+                                    if (pin->priority == 0)
+                                        {
+                                            if (strcmp (pout->inttype,
+                                                        "ETHERNET") == 0)
+                                                {
+                                                    fprintf (fp,
+                                                             "%d/%d %s %s %s\n",
+                                                             pin->fid,
+                                                             tmp->type,
+                                                             pin->macaddress,
+                                                             pin->source,
+                                                             pout->ifname);
+                                                }
+                                            else
+                                                {
+                                                    fprintf (fp,
+                                                             "%d/%d %s %s %s\n",
+                                                             pin->fid,
+                                                             tmp->type,
+                                                             pin->macaddress,
+                                                             pin->source,
+                                                             pout->peerip);
+                                                }
+                                            list_del_init (&pin->list);
+                                        }
+                                    else
+                                        {
+                                            list_max = MAX(list_max,
+                                                           pin->priority);
+                                            printf ("-----------MAX= %d\n",
+                                                    list_max);
+                                        }
+                                    free (tmp);
+                                }
+                        }
+                }
+        }
+
+    /*遍历2 int*/
     list_for_each_entry(pout,&int_head,list)
         {
             list_for_each_entry(pin,&mac_head,list)
@@ -362,7 +424,39 @@ deal_with_cmd (FILE *fp)
                     /*接口出口存在的时候才可连接*/
                     if (pout->ifname && pout->ifx && pout->ifx == pin->nexthop)
                         {
-//                            fid2mac_type(pin->fid);
+                            nRet = fid2mac_type (pin->fid, &tmp);
+                            if (nRet >= 0)
+                                {
+//                                    if (pin->priority == list_max)
+                                        {
+                                            printf (" max= %d\n", list_max);
+                                            if (strcmp (pout->inttype,
+                                                        "ETHERNET") == 0)
+                                                {
+                                                    fprintf (
+                                                            fp,
+                                                            "%d/%d %s %s %s %d\n",
+                                                            pin->fid, tmp->type,
+                                                            pin->macaddress,
+                                                            pin->source,
+                                                            pout->ifname,
+                                                            pin->priority);
+                                                }
+                                            else
+                                                {
+                                                    fprintf (
+                                                            fp,
+                                                            "%d/%d %s %s %s %d\n",
+                                                            pin->fid, tmp->type,
+                                                            pin->macaddress,
+                                                            pin->source,
+                                                            pout->peerip,
+                                                            pin->priority);
+                                                }
+
+                                        }
+                                    free (tmp);
+                                }
                         }
                 }
         }

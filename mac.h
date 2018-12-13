@@ -9,6 +9,8 @@
 #define MAC_H_
 #include "list.h"
 
+#define MAX(X,Y) ((X)>(Y)?(X):(Y))
+
 #define TYPE_LEN 16
 #define ROTO_LEN 16
 #define SOURCE_LEN 16
