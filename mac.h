@@ -64,12 +64,26 @@ struct list_head mac_head;
 struct list_head int_head;
 struct list_head esi_head;
 
-
+int
+copy_to_mac_in (struct mac_in *p, struct mac_in *s);
 int
 add_mac_in (struct mac_in *s);
 int
 check_mac_in (struct mac_in *p);
 u32
 get_mac_in_key (int fid, const char *mac_addr);
+
+int
+copy_to_int_out (struct int_out *p, struct int_out *s);
+
+struct int_out *
+look_up_int_out (struct int_out *s);
+
+int
+add_int_out (struct int_out *s);
+
+u32
+get_int_out_key (int ifx);
+
 
 #endif /* MAC_H_ */

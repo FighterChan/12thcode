@@ -88,7 +88,6 @@ parse_cmd (FILE *fp)
 
                             /* 输入参数检查,入参错误时不加入链表*/
                             valid = check_mac_in (&pmac_in);
-                            printf("valid = %d\n",valid);
                             if (valid < 0)
                                 {
                                     valid = 0;
@@ -98,7 +97,7 @@ parse_cmd (FILE *fp)
                             if (strcmp (pmac_in.source, "STATIC") == 0)
                                 {
                                     /*不存在多个STATIC的情况*/
-//                                    pmac_in->priority = 0;
+//                                    pmac_in.priority = 0;
                                 }
                             else
                                 {
@@ -106,7 +105,7 @@ parse_cmd (FILE *fp)
                                     st_priority++;
                                     pmac_in.priority = st_priority;
                                 }
-                                add_mac_in (&pmac_in);
+                            add_mac_in (&pmac_in);
 //                            list_add_tail (&pmac_in->list, &mac_head);
 
                         }
@@ -148,7 +147,7 @@ parse_cmd (FILE *fp)
                                     valid = 0;
                                     continue;
                                 }
-
+                                add_int_out (&pint_out);
 //                            list_add_tail (&pint_out.list, &int_head);
 
                         }
@@ -193,6 +192,8 @@ parse_cmd (FILE *fp)
             memset (type, 0, sizeof(type));
             memset (&smac_in, 0, sizeof(struct mac_in));
             memset (&pmac_in, 0, sizeof(struct mac_in));
+            memset (&sint_out, 0, sizeof(struct int_out));
+            memset (&pint_out, 0, sizeof(struct int_out));
         }
     return 0;
 }
@@ -206,8 +207,6 @@ deal_with_cmd (FILE *fp)
 
     struct mac_type tmp;
     memset (&tmp, 0, sizeof(struct mac_type));
-    int nRet = 0;
-    memset (&tmp, 0, sizeof(struct mac_type));
     /*遍历int*/
     list_for_each_entry_safe(pout,nout,&int_head,list)
         {
@@ -216,7 +215,7 @@ deal_with_cmd (FILE *fp)
                     /*接口出口存在的时候才可连接*/
                     if (pout->ifname && pout->ifx && pout->ifx == pin->nexthop)
                         {
-                            nRet = fid2mac_type (pin->fid, &tmp);
+                            fid2mac_type (pin->fid, &tmp);
                             if (pin->priority == 0)
                                 {
                                     if (strcmp (pout->inttype, "ETHERNET") == 0)
@@ -254,25 +253,23 @@ deal_with_cmd (FILE *fp)
                     /*接口出口存在的时候才可连接*/
                     if (pout->ifname && pout->ifx && pout->ifx == pin->nexthop)
                         {
-                            nRet = fid2mac_type (pin->fid, &tmp);
-//                                    if (pin->priority == list_max)
+                            fid2mac_type (pin->fid, &tmp);
+//                            if (pin->priority == list_max)
                                 {
                                     printf (" max= %d\n", list_max);
                                     if (strcmp (pout->inttype, "ETHERNET") == 0)
                                         {
-                                            fprintf (fp, "%d/%d %s %s %s %d\n",
+                                            fprintf (fp, "%d/%d %s %s %s\n",
                                                      tmp.val, tmp.type,
                                                      pin->macaddress,
-                                                     pin->source, pout->ifname,
-                                                     pin->priority);
+                                                     pin->source, pout->ifname);
                                         }
                                     else
                                         {
-                                            fprintf (fp, "%d/%d %s %s %s %d\n",
+                                            fprintf (fp, "%d/%d %s %s %s\n",
                                                      tmp.val, tmp.type,
                                                      pin->macaddress,
-                                                     pin->source, pout->peerip,
-                                                     pin->priority);
+                                                     pin->source, pout->peerip);
                                         }
 
                                 }
@@ -281,20 +278,7 @@ deal_with_cmd (FILE *fp)
         }
     return 0;
 }
-void
-dotest ()
-{
-    int f = 0;
-    char out[16];
-    char out2[16];
-    char *buf = "type: \"ADD-MAC\","
-            "\r\n proto: 123,";
-    sscanf (buf, "%*s%*s%*s%d", &f);
-    printf ("%d\n", f);
 
-    while (1)
-        ;
-}
 int
 main (int argc, char **argv)
 {

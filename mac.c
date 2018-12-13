@@ -36,6 +36,7 @@ copy_to_mac_in (struct mac_in *p, struct mac_in *s)
     strcpy (p->macaddress, s->macaddress);
     strcpy (p->nexthoptype, s->nexthoptype);
     p->nexthop = s->nexthop;
+    p->priority = s->priority;
     return 0;
 }
 
@@ -47,12 +48,14 @@ look_up_mac_in (struct mac_in *s)
     struct mac_in *n;
     u32 key, keytmp;
     key = get_mac_in_key (s->fid, s->macaddress);
-    printf("key = %d\n",key);
+    printf ("mackey = %ld\n", key);
     list_for_each_entry_safe(p, n, &mac_head,list)
         {
             keytmp = get_mac_in_key (p->fid, p->macaddress);
-            if (key == keytmp)
+            if ((key == keytmp) && (strcmp (p->source, "STATIC") != 0))
                 {
+                    copy_to_mac_in (p, s);
+
                     return p;
                 }
         }
@@ -78,7 +81,6 @@ add_mac_in (struct mac_in *s)
         }
     else
         {
-            copy_to_mac_in (p, s);
             return 0;
         }
     return -1;
@@ -90,8 +92,72 @@ get_mac_in_key (int fid, const char *mac_addr)
     struct mac_type tmp;
     memset (&tmp, 0, sizeof(struct mac_type));
     fid2mac_type (fid, &tmp);
-    printf("vid = %d\n",tmp.val);
-    return (jhash_2words (tmp.val, jhash (mac_addr, strlen (mac_addr), 0), 0)%1024);
+    return (jhash_2words (tmp.val, jhash (mac_addr, strlen (mac_addr), 0), 0)
+            % 1024);
+}
+
+/*出接口*/
+int
+copy_to_int_out (struct int_out *p, struct int_out *s)
+{
+
+    strcpy (p->type, s->type);
+    strcpy (p->inttype, s->inttype);
+    p->ifx = s->ifx;
+    strcpy (p->ifname, s->ifname);
+    strcpy (p->peerip, s->peerip);
+    return 0;
+}
+
+struct int_out *
+look_up_int_out (struct int_out *s)
+{
+
+    struct int_out *p;
+    struct int_out *n;
+    u32 key, keytmp;
+    key = get_int_out_key (s->ifx);
+    printf ("intkey = %ld\n", key);
+    list_for_each_entry_safe(p, n, &int_head,list)
+        {
+            keytmp = get_int_out_key (p->ifx);
+            if (key == keytmp)
+                {
+                    copy_to_int_out (p, s);
+                    return p;
+                }
+        }
+    return NULL;
+}
+
+int
+add_int_out (struct int_out *s)
+{
+    struct int_out *p = NULL;
+    struct int_out *n;
+    p = look_up_int_out (s);
+    if (p == NULL)
+        {
+            p = (struct int_out *) malloc (sizeof(struct int_out));
+            if (p == NULL)
+                {
+                    return -1;
+                }
+            copy_to_int_out (p, s);
+            list_add_tail (&p->list, &int_head);
+            return 0;
+        }
+    else
+        {
+            return 0;
+        }
+    return -1;
+}
+
+u32
+get_int_out_key (int ifx)
+{
+    return (jhash_1word (ifx, 0) % 1024);
 }
 
 /* 过滤不合法的输入参数 */

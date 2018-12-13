@@ -1,7 +1,7 @@
 [
 	{
-		type:    "ADD-MAC",
-		proto:     "DOT1Q",
+		type:  "ADD-MAC",
+		proto: "DOT1Q",
 		source: "MLAG",
 		fid: 1024,
 		macaddress: "0000.0000.0001",
