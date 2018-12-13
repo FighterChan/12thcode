@@ -13,13 +13,14 @@
  */
 #include <stdbool.h>
 #include <stdlib.h>
+#include <stddef.h>
 
 #define POISON_POINTER_DELTA (0)
 #define LIST_POISON1  ((void *) 0x00100100 + POISON_POINTER_DELTA)
 #define LIST_POISON2  ((void *) 0x00200200 + POISON_POINTER_DELTA)
 #define WRITE_ONCE(var, val)  (*((volatile typeof(val) *)(&(var))) = (val))
 
-#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+//#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
 
 /**
  * container_of - cast a member of a structure out to the containing structure

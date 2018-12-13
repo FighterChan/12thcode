@@ -7,16 +7,30 @@
 
 #ifndef MAC_H_
 #define MAC_H_
+#include "list.h"
+
+struct mac
+{
+    char type[16];
+    char proto[16];
+    char source[16];
+    char fid[16];
+    char macaddress[32];
+    char nexthoptype[32];
+    char nexthop[16]; /*取值范围[1~65535]*/
+    struct list_head list;
+};
 
 struct mac_in
 {
-    char type[8];
-    char proto[8];
-    char source[8];
+    char type[16];
+    char proto[16];
+    char source[16];
     int fid;
-    char macaddress[16];
-    char nexthoptype[16];
+    char macaddress[32];
+    char nexthoptype[32];
     int nexthop; /*取值范围[1~65535]*/
+    struct list_head list;
 };
 
 struct int_out
