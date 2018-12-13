@@ -1,6 +1,6 @@
 [
 	{
-		type:    "ADD-MAC",
+		type:    "ADD-MAC22",
 		proto:     "DOT1Q",
 		source: "MLAG",
 		fid: 1024,

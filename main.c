@@ -15,9 +15,137 @@
 #include "list.h"
 #include "mac.h"
 
-struct list_head smac_head;
+struct list_head mac_head;
 struct list_head int_head;
 struct list_head esi_head;
+
+struct mac_type
+{
+    char type;
+    int val;
+};
+enum
+{
+    _VID, _VNI
+};
+int
+mac_type2fid (struct mac_type *p)
+{
+    if (p->type == _VID)
+        {
+            if (p->val < VID_MIN || p->val > VID_MAX)
+                {
+                    return -1;
+                }
+        }
+    else
+        {
+            if (p->val < VNI_MIN || p->val > VNI_MAX)
+                {
+                    return -1;
+                }
+        }
+
+    return ((p->type << 24) | (p->val & 0xffffff));
+}
+
+struct mac_type *
+fid2mac_type (int fid)
+{
+    int nRet;
+    struct mac_type *tmp;
+    tmp = (struct mac_type *) malloc (sizeof(struct mac_type));
+    if (!tmp)
+        {
+            printf("struct mac_type malloc 失败!\n");
+            return NULL;
+        }
+    tmp->type = (char) (fid >> 24);
+    tmp->val = (fid & 0xffffff);
+    nRet = mac_type2fid (tmp);
+    if (nRet < 0)
+        {
+            return NULL;
+        }
+    return tmp;
+}
+
+int
+check_ifx_nexthop (int ifx)
+{
+    if (ifx < 1 || ifx > 65535)
+        {
+            return -1;
+        }
+    return 0;
+}
+/* 过滤不合法的输入参数 */
+int
+check_mac_in (struct mac_in *p)
+{
+    int valid;
+
+    valid = 0;
+    /*检查fid是否合法*/
+    struct mac_type *val1;
+    val1 = fid2mac_type (p->fid);
+    if (!val1)
+        {
+            return -1;
+        }
+    /*检查proto是否合法*/
+    int i;
+    for (i = 0; i < sizeof(strproto) / sizeof(strproto[0]); i++)
+        {
+            if (strcmp (p->proto, strproto[i]) == 0)
+                {
+                    /*满足一个proto项即可*/
+                    valid = 0;
+                    break;
+                }
+        }
+    if (valid != 0)
+        {
+            return -1;
+        }
+    /*检查source是否合法*/
+    valid = 0;
+    for (i = 0; i < sizeof(strsource) / sizeof(strsource[0]); ++i)
+        {
+            if (strcmp (p->source, strsource[i]) == 0)
+                {
+                    /*满足一个source项即可*/
+                    valid = 0;
+                    break;
+                }
+        }
+    if (valid != 0)
+        {
+            return -1;
+        }
+    /*检查nexthoptype是否合法*/
+    valid = 0;
+    for (i = 0; i < sizeof(strnexthoptype) / sizeof(strnexthoptype[0]); ++i)
+        {
+            if (strcmp (p->nexthoptype, strnexthoptype[i]) == 0)
+                {
+                    /*满足一个source项即可*/
+                    valid = 0;
+                    break;
+                }
+        }
+    if (valid != 0)
+        {
+            return -1;
+        }
+
+    /*检查nexthop是否合法*/
+    if (check_ifx_nexthop (p->nexthop) < 0)
+        {
+            return -1;
+        }
+    return 0;
+}
 
 int
 parse_cmd (const char *path)
@@ -26,11 +154,12 @@ parse_cmd (const char *path)
     struct int_out *pint_out;
     struct esi *pesi;
 
-    INIT_LIST_HEAD (&smac_head);
+    INIT_LIST_HEAD (&mac_head);
     INIT_LIST_HEAD (&int_head);
     INIT_LIST_HEAD (&esi_head);
 
     int nRet;
+    int valid;
     char type[64];
 
     memset (type, 0, sizeof(type));
@@ -92,7 +221,14 @@ parse_cmd (const char *path)
 
                             pmac_in->nexthop = smac_in.nexthop;
 
-                            list_add_tail (&pmac_in->list, &smac_head);
+                            /* 输入参数检查,入参错误时不加入链表*/
+                            valid = check_mac_in (pmac_in);
+                            if (valid < 0)
+                                {
+                                    continue;
+                                }
+
+                            list_add_tail (&pmac_in->list, &mac_head);
 
                         }
                     else if (strcmp (type, "\"ADD-INT\",") == 0)
@@ -180,6 +316,33 @@ parse_cmd (const char *path)
     return 0;
 }
 
+int
+deal_with_cmd (const char *path)
+{
+    struct mac_in *pin;
+    struct int_out *pout;
+
+    char outfile[16];
+    memset (outfile, 0, sizeof(outfile));
+    sprintf (outfile, "%s_result", path);
+    FILE *outfp;
+    outfp = fopen (outfile, "w");
+    if (!outfp)
+        {
+            printf ("can not open file!\n");
+            return -1;
+        }
+
+    /*遍历int*/
+    list_for_each_entry(pout,&int_head,list)
+        {
+//            if (strcmp (pout->type) == 0)
+//                {
+//
+//                }
+        }
+    return 0;
+}
 void
 dotest ()
 {
@@ -208,11 +371,10 @@ main (int argc, char **argv)
     /*解析文件*/
     parse_cmd (argv[1]);
     /*处理*/
-
-
+//    deal_with_cmd (argv[1]);
 #endif
     struct mac_in *p;
-    list_for_each_entry(p,&smac_head,list)
+    list_for_each_entry(p,&mac_head,list)
         {
             printf ("type:%s\n", p->type);
             printf ("proto:%s\n", p->proto);

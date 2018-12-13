@@ -20,6 +20,20 @@
 #define NAME_LEN 16
 #define NEXTHOPIFX_LEN 256
 
+#define VID_MIN 1
+#define VID_MAX 4094
+#define VNI_MIN 1
+#define VNI_MAX 16777215
+
+char *strproto[8] =
+    { "VXLAN", "DOT1Q" };
+
+char *strsource[8] =
+    { "STATIC", "LOCAL", "MLAG", "EVPN" };
+
+char *strnexthoptype[16] =
+    { "INTERFACE", "ESI" };
+
 struct mac_in
 {
     char type[TYPE_LEN];
