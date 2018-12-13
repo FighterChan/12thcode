@@ -9,33 +9,46 @@
 #define MAC_H_
 #include "list.h"
 
+#define TYPE_LEN 16
+#define ROTO_LEN 16
+#define SOURCE_LEN 16
+#define MACADDRESS_LEN 32
+#define NEXTHOPTYPE_LEN 32
+#define INTTYPE_LEN 16
+#define IFNAME_LEN 32
+#define PEERIP_LEN 32
+#define NAME_LEN 16
+#define NEXTHOPIFX_LEN 256
+
 struct mac_in
 {
-    char type[16];
-    char proto[16];
-    char source[16];
+    char type[TYPE_LEN];
+    char proto[ROTO_LEN];
+    char source[SOURCE_LEN];
     int fid;
-    char macaddress[32];
-    char nexthoptype[32];
+    char macaddress[MACADDRESS_LEN];
+    char nexthoptype[NEXTHOPTYPE_LEN];
     int nexthop; /*取值范围[1~65535]*/
     struct list_head list;
 };
 
 struct int_out
 {
-    char type[8];
-    char inttype[8];
+    char type[TYPE_LEN];
+    char inttype[INTTYPE_LEN];
     int ifx;
-    char ifname[16];
-    char peerip[16];
+    char ifname[IFNAME_LEN];
+    char peerip[PEERIP_LEN];
+    struct list_head list;
 };
 
 struct esi
 {
-    char type[8];
-    char name[8];
+    char type[TYPE_LEN];
+    char name[NAME_LEN];
     int nexthopcount;
-    char nexthopifx[1024];
+    char nexthopifx[NEXTHOPIFX_LEN];
+    struct list_head list;
 };
 
 #endif /* MAC_H_ */
