@@ -225,6 +225,7 @@ parse_cmd (const char *path)
                             valid = check_mac_in (pmac_in);
                             if (valid < 0)
                                 {
+                                    valid = 0;
                                     continue;
                                 }
 
@@ -267,6 +268,13 @@ parse_cmd (const char *path)
                                     memcpy (pint_out->peerip,
                                             sint_out.peerip + 1,
                                             strlen (sint_out.peerip) - 2);
+                                }
+                           /*检查ifx是否合法*/
+                            valid = check_ifx_nexthop(pint_out->ifx);
+                            if(valid < 0)
+                                {
+                                    valid = 0;
+                                    continue;
                                 }
 
                             list_add_tail (&pint_out->list, &int_head);
