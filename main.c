@@ -434,46 +434,13 @@ main (int argc, char **argv)
             return -1;
         }
 
-//    list_free();
-    struct mac_in *p;
-    list_for_each_entry(p,&mac_head,list)
-        {
-            printf ("type:%s\n", p->type);
-            printf ("proto:%s\n", p->proto);
-            printf ("source:%s\n", p->source);
-            printf ("fid:%d\n", p->fid);
-            printf ("macaddress:%s\n", p->macaddress);
-            printf ("nexthoptype:%s\n", p->nexthoptype);
-            printf ("nexthop:%s\n", p->nexthop);
-            printf ("-----------------------------\n");
-        }
 
-    struct int_out *p2;
-    list_for_each_entry(p2,&int_head,list)
-        {
-            printf ("type:%s\n", p2->type);
-            printf ("inttype:%s\n", p2->inttype);
-            printf ("ifx:%d\n", p2->ifx);
-            printf ("ifname:%s\n", p2->ifname);
-            printf ("peerip:%s\n", p2->peerip);
-            printf ("-----------------------------\n");
-        }
-
-    printf ("处理完毕\n");
-    struct esi *p3;
-    list_for_each_entry(p3,&esi_head,list)
-        {
-            printf ("type:%s\n", p3->type);
-            printf ("name:%s\n", p3->name);
-            printf ("nexthopcount:%d\n", p3->nexthopcount);
-            printf ("nexthopifx:%d\n", p3->nexthopifx[0]);
-            printf ("nexthopifx:%d\n", p3->nexthopifx[1]);
-
-            printf ("-----------------------------\n");
-        }
     deal_with_cmd (outfp);
 
     show (outfp);
+
+    free_list();
+
     fclose (outfp);
 
     return 0;

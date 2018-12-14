@@ -115,6 +115,21 @@ del_mac_in (struct mac_in *s)
     return -1;
 }
 
+int
+free_mac_in (void)
+{
+    struct mac_in *p;
+    struct mac_in *n;
+
+    list_for_each_entry_safe(p,n,&mac_head,list)
+        {
+            list_del_init (&p->list);
+            free (p);
+            p = NULL;
+        }
+    return 0;
+}
+
 u32
 get_mac_in_key (int fid, const char *mac_addr)
 {
@@ -199,6 +214,21 @@ del_int_out (struct int_out *s)
     return 0;
 }
 
+int
+free_int_out (void)
+{
+    struct int_out *p;
+    struct int_out *n;
+
+    list_for_each_entry_safe(p,n,&int_head,list)
+        {
+            list_del_init (&p->list);
+            free (p);
+            p = NULL;
+        }
+    return 0;
+}
+
 u32
 get_int_out_key (int ifx)
 {
@@ -207,7 +237,7 @@ get_int_out_key (int ifx)
 
 /*ESI*/
 int
-copy_to_esi (struct esi *p, struct esi *s,int count)
+copy_to_esi (struct esi *p, struct esi *s, int count)
 {
     int i;
     strcpy (p->type, s->type);
@@ -221,7 +251,7 @@ copy_to_esi (struct esi *p, struct esi *s,int count)
 }
 
 int
-add_esi (struct esi *s,int count)
+add_esi (struct esi *s, int count)
 {
     struct esi *p = NULL;
     struct esi *n;
@@ -232,7 +262,7 @@ add_esi (struct esi *s,int count)
                 {
                     return -1;
                 }
-            copy_to_esi (p, s,count);
+            copy_to_esi (p, s, count);
             list_add_tail (&p->list, &esi_head);
             return 0;
         }
@@ -255,6 +285,21 @@ del_esi (struct esi *s)
                     list_del_init (&p->list);
                     free (p);
                 }
+        }
+    return 0;
+}
+
+int
+free_esi (void)
+{
+    struct esi *p;
+    struct esi *n;
+
+    list_for_each_entry_safe(p,n,&esi_head,list)
+        {
+            list_del_init (&p->list);
+            free (p);
+            p = NULL;
         }
     return 0;
 }
@@ -286,6 +331,29 @@ add_out_tab (struct out_tab *s)
     return 0;
 }
 
+int
+free_out_tab (void)
+{
+    struct out_tab *p;
+    struct out_tab *n;
+
+    list_for_each_entry_safe(p,n,&out_head,list)
+        {
+            list_del_init (&p->list);
+            free (p);
+            p = NULL;
+        }
+    return 0;
+}
+
+void
+free_list (void)
+{
+    free_mac_in();
+    free_int_out();
+    free_esi();
+    free_out_tab();
+}
 /* 过滤不合法的输入参数 */
 int
 check_mac_in (struct mac_in *p, int add_del)

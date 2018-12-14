@@ -112,5 +112,15 @@ int
 copy_to_out_tab (struct out_tab *p, struct out_tab *s);
 int
 add_out_tab (struct out_tab *s);
+int
+free_mac_in (void);
+int
+free_esi (void);
+int
+free_int_out (void);
+int
+free_out_tab (void);
+void
+free_list (void);
 
 #endif /* MAC_H_ */
