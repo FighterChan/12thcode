@@ -4,12 +4,8 @@
 
 struct mac_type
 {
-    char type;
+    unsigned char type;
     int val;
-};
-enum
-{
-    _VID, _VNI
 };
 
 int

@@ -15,6 +15,11 @@
 #include "tools.h"
 #include "mac.h"
 
+enum
+{
+    _VID, _VNI
+};
+
 int
 mac_type2fid (struct mac_type *p)
 {
@@ -33,7 +38,7 @@ mac_type2fid (struct mac_type *p)
                 }
         }
 
-    return (((p->type & 0xff000000) >> 24) | (p->val & 0xffffff));
+    return ((p->type << 24) | (p->val & 0xffffff));
 }
 
 int
@@ -42,7 +47,7 @@ fid2mac_type (int fid, struct mac_type *p)
     int nRet;
     struct mac_type *tmp = p;
 
-    tmp->type = (char) ((fid & 0xff000000) >> 24);
+    tmp->type = (unsigned char) (fid >> 24);
     tmp->val = (fid & 0xffffff);
     nRet = mac_type2fid (tmp);
 

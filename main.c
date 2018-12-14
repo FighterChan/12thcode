@@ -106,7 +106,6 @@ parse_cmd (FILE *fp)
                                     pmac_in.priority = st_priority;
                                 }
                             add_mac_in (&pmac_in);
-//                            list_add_tail (&pmac_in->list, &mac_head);
 
                         }
                     else if (strcmp (type, "\"ADD-INT\",") == 0)
@@ -148,7 +147,6 @@ parse_cmd (FILE *fp)
                                     continue;
                                 }
                             add_int_out (&pint_out);
-//                            list_add_tail (&pint_out.list, &int_head);
 
                         }
                     else if (strcmp (type, "\"ADD-ESI\",") == 0)
@@ -234,7 +232,7 @@ deal_with_cmd (FILE *fp)
 
                             memset (buf, 0, sizeof(buf));
                             vid_vni_show (&tmp, buf);
-                            if (strcmp (pin->source, "STATIC") == 0)
+//                            if (strcmp (pin->source, "STATIC") == 0)
                                 {
                                     if (strcmp (pout->inttype, "ETHERNET") == 0)
                                         {
@@ -244,21 +242,16 @@ deal_with_cmd (FILE *fp)
                                         }
                                     else
                                         {
-                                            fprintf (fp, "%s %s %s %s\n",
-                                                     buf, pin->macaddress,
+                                            fprintf (fp, "%s %s %s %s\n", buf,
+                                                     pin->macaddress,
                                                      pin->source, pout->peerip);
                                         }
                                     list_del_init (&pin->list);
                                 }
-                            else
-                                {
-                                    list_max = MAX(list_max, pin->priority);
-                                    printf ("-----------MAX= %d\n", list_max);
-                                }
                         }
                 }
         }
-#if 1
+#if 0
     memset (&tmp, 0, sizeof(struct mac_type));
 
     /*遍历2 int*/
@@ -278,16 +271,16 @@ deal_with_cmd (FILE *fp)
                                     if (strcmp (pout->inttype, "ETHERNET") == 0)
                                         {
                                             fprintf (fp, "%s %s %s %s\n",
-                                                     buf,
-                                                     pin->macaddress,
-                                                     pin->source, pout->ifname);
+                                                    buf,
+                                                    pin->macaddress,
+                                                    pin->source, pout->ifname);
                                         }
                                     else
                                         {
                                             fprintf (fp, "%s %s %s %s\n",
-                                                     buf,
-                                                     pin->macaddress,
-                                                     pin->source, pout->peerip);
+                                                    buf,
+                                                    pin->macaddress,
+                                                    pin->source, pout->peerip);
                                         }
 
                                 }
