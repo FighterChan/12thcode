@@ -16,7 +16,7 @@
 #include "mac.h"
 #include "tools.h"
 
-static int st_priority = 1;
+int static_count = 0;
 
 int
 parse_cmd (FILE *fp)
@@ -33,6 +33,7 @@ parse_cmd (FILE *fp)
     INIT_LIST_HEAD (&mac_head);
     INIT_LIST_HEAD (&int_head);
     INIT_LIST_HEAD (&esi_head);
+    INIT_LIST_HEAD (&out_head);
 
     int nRet;
     int valid;
@@ -63,10 +64,10 @@ parse_cmd (FILE *fp)
                             strcpy (pmac_in.type, "ADD-MAC");
 
                             nRet = fscanf (
-                                    fp, "%*s%s %*s%s %*s%d, %*s%s %*s%s %*s%d",
+                                    fp, "%*s%s %*s%s %*s%d, %*s%s %*s%s %*s%s",
                                     smac_in.proto, smac_in.source, &smac_in.fid,
                                     smac_in.macaddress, smac_in.nexthoptype,
-                                    &smac_in.nexthop);
+                                    smac_in.nexthop);
 
                             memcpy (pmac_in.proto, smac_in.proto + 1,
                                     strlen (smac_in.proto) - 3);
@@ -83,7 +84,17 @@ parse_cmd (FILE *fp)
                                     smac_in.nexthoptype + 1,
                                     strlen (smac_in.nexthoptype) - 3);
 
-                            pmac_in.nexthop = smac_in.nexthop;
+                            if (strcmp (pmac_in.nexthoptype, "INTERFACE") == 0)
+                                {
+                                    memcpy (pmac_in.nexthop, smac_in.nexthop,
+                                            strlen (smac_in.nexthop));
+                                }
+                            else if (strcmp (pmac_in.nexthoptype, "ESI") == 0)
+                                {
+                                    memcpy (pmac_in.nexthop,
+                                            smac_in.nexthop + 1,
+                                            strlen (smac_in.nexthop) - 2);
+                                }
 
                             /* 输入参数检查,入参错误时不加入链表*/
                             valid = check_mac_in (&pmac_in, _ADD);
@@ -141,21 +152,30 @@ parse_cmd (FILE *fp)
                         {
                             strcpy (pesi.type, "ADD-ESI");
 
-                            char tmpbuf[1024];
+                            char tmpbuf[512];
                             memset (tmpbuf, 0, sizeof(tmpbuf));
 
-                            nRet = fscanf (fp, "%*s%s %*s%d, %*s%s", sesi.name,
-                                           &sesi.nexthopcount, tmpbuf);
+                            nRet = fscanf (fp, "%*s%s %*s%d, %*s%[^]]",
+                                           sesi.name, &sesi.nexthopcount,
+                                           tmpbuf);
 
                             memcpy (pesi.name, sesi.name + 1,
                                     strlen (sesi.name) - 3);
 
                             pesi.nexthopcount = sesi.nexthopcount;
 
-                            int count;
-                            count = do_esi (tmpbuf, pesi.nexthopifx);
+                            printf ("\n------------------>>>%s\n", tmpbuf);
 
-                            add_esi (&pesi);
+//                            int count;
+                            static_count = do_esi (tmpbuf, pesi.nexthopifx);
+                            printf ("\ncount------------%d\n", static_count);
+
+                            printf ("pesi.nexthopifx[0]=%d\n",
+                                    pesi.nexthopifx[0]);
+                            printf ("pesi.nexthopifx[1]=%d\n",
+                                    pesi.nexthopifx[1]);
+//                            static_count = count;
+                            add_esi (&pesi,static_count);
 
                         }
                     else if (strcmp (type, "\"DEL-MAC\",") == 0)
@@ -249,10 +269,15 @@ vid_vni_show (struct mac_type *tmp, char *p)
 int
 deal_with_cmd (FILE *fp)
 {
+    struct out_tab stab;
+
     struct mac_in *pin, *nin;
     struct int_out *pout, *nout;
-    int list_max = 0;
+    struct esi *pesi, *nesi;
     char buf[32];
+
+    int next_hop = 0;
+    memset (&stab, 0, sizeof(struct out_tab));
 
     struct mac_type tmp;
     memset (&tmp, 0, sizeof(struct mac_type));
@@ -261,34 +286,103 @@ deal_with_cmd (FILE *fp)
         {
             list_for_each_entry_safe(pin,nin,&mac_head,list)
                 {
-                    /*接口出口存在的时候才可连接*/
-                    if (pout->ifname && pout->ifx && pout->ifx == pin->nexthop)
+                    if (strcmp (pin->nexthoptype, "INTERFACE") == 0)
                         {
-                            fid2mac_type (pin->fid, &tmp);
-
-                            memset (buf, 0, sizeof(buf));
-                            vid_vni_show (&tmp, buf);
-//                            if (strcmp (pin->source, "STATIC") == 0)
+                            next_hop = atoi (pin->nexthop);
+                            if (pout->ifx == next_hop)
                                 {
+                                    fid2mac_type (pin->fid, &tmp);
+                                    memset (buf, 0, sizeof(buf));
+                                    vid_vni_show (&tmp, buf);
+                                    /*赋值*/
+                                    strcpy (stab.strfid, buf);
+                                    strcpy (stab.macaddress, pin->macaddress);
+                                    strcpy (stab.source, pin->source);
                                     if (strcmp (pout->inttype, "ETHERNET") == 0)
                                         {
-                                            fprintf (fp, "%s %s %s %s\n", buf,
-                                                     pin->macaddress,
-                                                     pin->source, pout->ifname);
+                                            strcpy (stab.nexthop, pout->ifname);
                                         }
-                                    else
+                                    else if (strcmp (pout->inttype, "TUNNEL")
+                                            == 0)
                                         {
-                                            fprintf (fp, "%s %s %s %s\n", buf,
-                                                     pin->macaddress,
-                                                     pin->source, pout->peerip);
+                                            strcpy (stab.nexthop, pout->peerip);
                                         }
+                                    add_out_tab (&stab);
                                 }
                         }
                 }
         }
+
+    /*遍历2*/
+    list_for_each_entry_safe(pin,nin,&mac_head,list)
+        {
+            list_for_each_entry_safe(pesi,nesi,&esi_head,list)
+                {
+                    if (strcmp (pin->nexthoptype, "ESI") == 0)
+                        {
+                            printf ("pesi->name:%s\n", pesi->name);
+                            printf ("pin->nexthop:%s\n", pin->nexthop);
+
+                            if (strcmp (pesi->name, pin->nexthop) == 0)
+                                {
+                                    fid2mac_type (pin->fid, &tmp);
+                                    memset (buf, 0, sizeof(buf));
+                                    vid_vni_show (&tmp, buf);
+
+                                    /*赋值*/
+                                    strcpy (stab.strfid, buf);
+                                    strcpy (stab.macaddress, pin->macaddress);
+                                    strcpy (stab.source, pin->source);
+                                    int i;
+                                    for (i = 0; i < static_count; ++i)
+                                        {
+                                            list_for_each_entry_safe(pout,nout,&int_head,list)
+                                                {
+                                                    if (pout->ifx
+                                                            == pesi->nexthopifx[i])
+                                                        {
+                                                            if (strcmp (
+                                                                    pout->inttype,
+                                                                    "ETHERNET")
+                                                                    == 0)
+                                                                {
+                                                                    strcpy (stab.nexthop,
+                                                                            pout->ifname);
+                                                                }
+                                                            else if (strcmp (
+                                                                    pout->inttype,
+                                                                    "TUNNEL")
+                                                                    == 0)
+                                                                {
+                                                                    strcpy (stab.nexthop,
+                                                                            pout->peerip);
+                                                                }
+                                                            /*添加out_table*/
+                                                            add_out_tab (&stab);
+                                                        }
+                                                }
+
+                                        }
+
+                                }
+                        }
+
+                }
+        }
+
     return 0;
 }
 
+void
+show (FILE *fp)
+{
+    struct out_tab *p, *n;
+    list_for_each_entry_safe(p,n,&out_head,list)
+        {
+            fprintf (fp, "%s %s %s %s\n", p->strfid, p->macaddress, p->source,
+                     p->nexthop);
+        }
+}
 int
 main (int argc, char **argv)
 {
@@ -331,7 +425,7 @@ main (int argc, char **argv)
             printf ("fid:%d\n", p->fid);
             printf ("macaddress:%s\n", p->macaddress);
             printf ("nexthoptype:%s\n", p->nexthoptype);
-            printf ("nexthop:%d\n", p->nexthop);
+            printf ("nexthop:%s\n", p->nexthop);
             printf ("-----------------------------\n");
         }
 
@@ -346,7 +440,21 @@ main (int argc, char **argv)
             printf ("-----------------------------\n");
         }
 
+    printf ("处理完毕\n");
+    struct esi *p3;
+    list_for_each_entry(p3,&esi_head,list)
+        {
+            printf ("type:%s\n", p3->type);
+            printf ("name:%s\n", p3->name);
+            printf ("nexthopcount:%d\n", p3->nexthopcount);
+            printf ("nexthopifx:%d\n", p3->nexthopifx[0]);
+            printf ("nexthopifx:%d\n", p3->nexthopifx[1]);
+
+            printf ("-----------------------------\n");
+        }
     deal_with_cmd (outfp);
+
+    show (outfp);
     fclose (outfp);
 
     return 0;

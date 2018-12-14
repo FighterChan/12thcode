@@ -14,11 +14,13 @@
 #include <string.h>
 #include <stdlib.h>
 
-char str[] = "[1234, 5678, 3456]";
+char str[] = "[1234, 5678]";
 
 int
 do_esi (const char *in, int data[])
 {
+    printf("len = %d\n",strlen(in));
+
     char buf[1024];
     memset (buf, 0, sizeof(buf));
     memcpy (buf, in + 1, strlen (in) - 2);
@@ -49,6 +51,7 @@ main (int argc, char **argv)
         {
             printf("%d ",d[j]);
         }
+    printf("\n%d ",count);
 
     return 0;
 }

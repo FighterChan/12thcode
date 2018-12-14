@@ -35,7 +35,7 @@ copy_to_mac_in (struct mac_in *p, struct mac_in *s)
     p->fid = s->fid;
     strcpy (p->macaddress, s->macaddress);
     strcpy (p->nexthoptype, s->nexthoptype);
-    p->nexthop = s->nexthop;
+    strcpy (p->nexthop, s->nexthop);
     return 0;
 }
 
@@ -186,14 +186,14 @@ add_int_out (struct int_out *s)
 int
 del_int_out (struct int_out *s)
 {
-    struct int_out *p,*n;
+    struct int_out *p, *n;
 
     list_for_each_entry_safe(p, n, &int_head,list)
         {
-            if(s->ifx == p->ifx)
+            if (s->ifx == p->ifx)
                 {
-                    list_del_init(&p->list);
-                    free(p);
+                    list_del_init (&p->list);
+                    free (p);
                 }
         }
     return 0;
@@ -207,13 +207,13 @@ get_int_out_key (int ifx)
 
 /*ESI*/
 int
-copy_to_esi (struct esi *p, struct esi *s)
+copy_to_esi (struct esi *p, struct esi *s,int count)
 {
     int i;
     strcpy (p->type, s->type);
     strcpy (p->name, s->name);
     p->nexthopcount = s->nexthopcount;
-    for (i = 0; i < sizeof(s->nexthopifx) / sizeof(int); ++i)
+    for (i = 0; i < count; ++i)
         {
             p->nexthopifx[i] = s->nexthopifx[i];
         }
@@ -221,7 +221,7 @@ copy_to_esi (struct esi *p, struct esi *s)
 }
 
 int
-add_esi (struct esi *s)
+add_esi (struct esi *s,int count)
 {
     struct esi *p = NULL;
     struct esi *n;
@@ -232,7 +232,7 @@ add_esi (struct esi *s)
                 {
                     return -1;
                 }
-            copy_to_esi (p, s);
+            copy_to_esi (p, s,count);
             list_add_tail (&p->list, &esi_head);
             return 0;
         }
@@ -246,16 +246,42 @@ add_esi (struct esi *s)
 int
 del_esi (struct esi *s)
 {
-    struct esi *p,*n;
+    struct esi *p, *n;
 
     list_for_each_entry_safe(p, n, &esi_head,list)
         {
-            if(strcmp(s->name,p->name) == 0)
+            if (strcmp (s->name, p->name) == 0)
                 {
-                    list_del_init(&p->list);
-                    free(p);
+                    list_del_init (&p->list);
+                    free (p);
                 }
         }
+    return 0;
+}
+
+/*输出链表*/
+int
+copy_to_out_tab (struct out_tab *p, struct out_tab *s)
+{
+    strcpy (p->strfid, s->strfid);
+    strcpy (p->macaddress, s->macaddress);
+    strcpy (p->source, s->source);
+    strcpy (p->nexthop, s->nexthop);
+    return 0;
+}
+
+int
+add_out_tab (struct out_tab *s)
+{
+    struct out_tab *p;
+    p = (struct out_tab *) malloc (sizeof(struct out_tab));
+    if (!p)
+        {
+            return -1;
+        }
+
+    copy_to_out_tab (p, s);
+    list_add_tail (&p->list, &out_head);
     return 0;
 }
 
@@ -326,10 +352,21 @@ check_mac_in (struct mac_in *p, int add_del)
                 }
 
             /*检查nexthop是否合法*/
-            if (check_ifx_nexthop (p->nexthop) < 0)
+            if (strcmp (p->nexthoptype, "INTERFACE") == 0)
                 {
-                    return -1;
+                    if (check_ifx_nexthop (atoi (p->nexthop)) < 0)
+                        {
+                            return -1;
+                        }
                 }
+            else if (strcmp (p->nexthoptype, "ESI") == 0)
+                {
+                    if (!(p->nexthop))
+                        {
+                            return -1;
+                        }
+                }
+
         }
     return 0;
 }

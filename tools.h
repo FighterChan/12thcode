@@ -17,6 +17,7 @@ check_ifx_nexthop (int ifx);
 int
 conver_filename (char *infile, char *outfile);
 int
-do_esi (const char *in, int data[]);
+do_esi (char *in, int data[]);
+
 /* body of tools.h */
 #endif /* _TOOLS_H_ */

@@ -8,6 +8,7 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
+#if 0
 /* 命令类型 */
 typedef enum
 {
@@ -29,5 +30,6 @@ static cli_cmd_t cli_cmd_tables[] =
         { "DEL-INT", DEL_INT },
         { "DEL-ESI", DEL_ESI },
     };
+#endif
 
 #endif /* MAIN_H_ */

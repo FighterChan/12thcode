@@ -17,20 +17,22 @@
 #define SOURCE_LEN 16
 #define MACADDRESS_LEN 32
 #define NEXTHOPTYPE_LEN 32
+#define NEXTHOP_LEN 64
 #define INTTYPE_LEN 16
 #define IFNAME_LEN 32
 #define PEERIP_LEN 32
-#define NAME_LEN 16
+#define NAME_LEN 32
 #define NEXTHOPIFX_LEN 1024
+#define STRFID_LEN  16
 
 #define VID_MIN 1
 #define VID_MAX 4094
 #define VNI_MIN 1
 #define VNI_MAX 16777215
 
-enum {
-    _ADD,
-    _DEL
+enum
+{
+    _ADD, _DEL
 };
 
 struct mac_in
@@ -41,7 +43,7 @@ struct mac_in
     int fid;
     char macaddress[MACADDRESS_LEN];
     char nexthoptype[NEXTHOPTYPE_LEN];
-    int nexthop; /*取值范围[1~65535]*/
+    char nexthop[NEXTHOP_LEN];
     struct list_head list;
 };
 
@@ -64,9 +66,20 @@ struct esi
     struct list_head list;
 };
 
+struct out_tab
+{
+    char strfid[STRFID_LEN];
+    char macaddress[MACADDRESS_LEN];
+    char source[SOURCE_LEN];
+    char nexthop[NEXTHOP_LEN];
+    struct list_head list;
+};
+
+/*全局变量*/
 struct list_head mac_head;
 struct list_head int_head;
 struct list_head esi_head;
+struct list_head out_head;
 
 int
 copy_to_mac_in (struct mac_in *p, struct mac_in *s);
@@ -89,10 +102,14 @@ del_int_out (struct int_out *s);
 u32
 get_int_out_key (int ifx);
 int
-copy_to_esi (struct esi *p, struct esi *s);
+copy_to_esi (struct esi *p, struct esi *s, int count);
 int
-add_esi (struct esi *s);
+add_esi (struct esi *s, int count);
 int
 del_esi (struct esi *s);
+int
+copy_to_out_tab (struct out_tab *p, struct out_tab *s);
+int
+add_out_tab (struct out_tab *s);
 
 #endif /* MAC_H_ */
