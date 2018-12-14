@@ -145,7 +145,7 @@ parse_cmd (FILE *fp)
             {
               strcpy (pesi.type, "ADD-ESI");
 
-              char tmpbuf[512];
+              char tmpbuf[1024];
               memset (tmpbuf, 0, sizeof(tmpbuf));
 
               nRet = fscanf (fp, "%*s%s %*s%d, %*s%[^]]", sesi.name,
