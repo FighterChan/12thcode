@@ -9,6 +9,7 @@
 #define MAC_H_
 #include "list.h"
 #include "jhash.h"
+#include "tools.h"
 
 #define MAX(X,Y) ((X)>(Y)?(X):(Y))
 
@@ -73,6 +74,7 @@ struct out_tab
     char source[SOURCE_LEN];
     char nexthop[NEXTHOP_LEN];
     int flg;
+    struct mac_type set;
     struct list_head list;
 };
 
@@ -122,5 +124,8 @@ int
 free_out_tab (void);
 void
 free_list (void);
+
+int
+sort_out_tab (struct out_tab *new);
 
 #endif /* MAC_H_ */

@@ -308,6 +308,8 @@ deal_with_cmd (FILE *fp)
                                             strcpy (stab.nexthop, pout->peerip);
                                         }
                                     stab.flg = 0;
+                                    stab.set.type = tmp.type;
+                                    stab.set.val = tmp.val;
                                     add_out_tab (&stab);
                                 }
                         }
@@ -380,6 +382,7 @@ show (FILE *fp)
 {
     struct out_tab *p, *n;
     int i = 0;
+
     list_for_each_entry_safe(p,n,&out_head,list)
         {
             if (p->flg != 0)
@@ -391,7 +394,7 @@ show (FILE *fp)
                         }
                     else
                         {
-                            fprintf (fp, "%s\n", p->nexthop);
+                            fprintf (fp, "                         %s\n", p->nexthop);
                         }
                     i++;
                 }

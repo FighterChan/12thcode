@@ -313,6 +313,8 @@ copy_to_out_tab (struct out_tab *p, struct out_tab *s)
     strcpy (p->source, s->source);
     strcpy (p->nexthop, s->nexthop);
     p->flg = s->flg;
+    p->set.type = s->set.type;
+    p->set.val = s->set.val;
     return 0;
 }
 
@@ -327,7 +329,8 @@ add_out_tab (struct out_tab *s)
         }
 
     copy_to_out_tab (p, s);
-    list_add_tail (&p->list, &out_head);
+    sort_out_tab (p);
+//    list_add_tail (&p->list, &out_head);
     return 0;
 }
 
@@ -349,11 +352,86 @@ free_out_tab (void)
 void
 free_list (void)
 {
-    free_mac_in();
-    free_int_out();
-    free_esi();
-    free_out_tab();
+    free_mac_in ();
+    free_int_out ();
+    free_esi ();
+    free_out_tab ();
 }
+
+/*out_tab排序
+ * 1.vid/vni 類型相同，直接排出
+ * 2.vid/vni 大小
+ * 3.macaddr
+ *
+ * */
+int
+sort_out_tab (struct out_tab *new)
+{
+
+    struct out_tab *p, *n;
+    struct out_tab *tmp;
+    if (list_empty (&out_head))
+        {
+            list_add_tail (&new->list, &out_head);
+            return 0;
+        }
+    list_for_each_entry_safe(p,n,&out_head,list)
+        {
+            if (new->set.type == p->set.type && new->set.val == p->set.val)
+                {
+                    tmp = p;
+                    if (strcmp (new->macaddress, p->macaddress) > 0)
+                        {
+                            list_add (&new->list, &p->list);
+                            return 0;
+                        }
+                }
+        }
+
+    if (tmp != NULL)
+        {
+            list_add_tail (&new->list, &tmp->list);
+            return 0;
+        }
+
+    tmp = NULL;
+    list_for_each_entry_safe(p,n,&out_head,list)
+        {
+            if (new->set.type == p->set.type)
+                {
+                    tmp = p;
+                    if (new->set.val > p->set.val)
+                        {
+                            list_add (&new->list, &p->list);
+                            return 0;
+                        }
+                }
+        }
+    if (tmp != NULL)
+        {
+            list_add_tail (&new->list, &tmp->list);
+            return 0;
+        }
+
+    tmp = NULL;
+    list_for_each_entry_safe(p,n,&out_head,list)
+        {
+            tmp = p;
+            if (new->set.type > p->set.type)
+                {
+                    list_add (&new->list, &p->list);
+                    return 0;
+                }
+        }
+    if (tmp != NULL)
+        {
+            list_add_tail (&new->list, &tmp->list);
+            return 0;
+        }
+    list_add_tail (&new->list, &out_head);
+    return 0;
+}
+
 /* 过滤不合法的输入参数 */
 int
 check_mac_in (struct mac_in *p, int add_del)
