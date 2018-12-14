@@ -59,7 +59,6 @@ parse_cmd (FILE *fp)
 
                     if (strcmp (type, "\"ADD-MAC\",") == 0)
                         {
-                            pmac_in.priority = 0;
 
                             strcpy (pmac_in.type, "ADD-MAC");
 
@@ -87,24 +86,13 @@ parse_cmd (FILE *fp)
                             pmac_in.nexthop = smac_in.nexthop;
 
                             /* 输入参数检查,入参错误时不加入链表*/
-                            valid = check_mac_in (&pmac_in);
+                            valid = check_mac_in (&pmac_in, _ADD);
                             if (valid < 0)
                                 {
                                     valid = 0;
                                     continue;
                                 }
 
-                            if (strcmp (pmac_in.source, "STATIC") == 0)
-                                {
-                                    /*不存在多个STATIC的情况*/
-//                                    pmac_in.priority = 0;
-                                }
-                            else
-                                {
-                                    /*判断优先级*/
-                                    st_priority++;
-                                    pmac_in.priority = st_priority;
-                                }
                             add_mac_in (&pmac_in);
 
                         }
@@ -151,47 +139,95 @@ parse_cmd (FILE *fp)
                         }
                     else if (strcmp (type, "\"ADD-ESI\",") == 0)
                         {
-//                            pesi = (struct esi *) malloc (
-//                                    sizeof(struct esi));
-//                            if (!pesi)
-//                                {
-//                                    return -1;
-//                                }
-//                            strcpy (pesi->type, "ADD-ESI");
-//
-//                            nRet = fscanf (
-//                                    fp, "%*s%s %*s%s %*s%d, %*s%s %*s%s %*s%d",
-//                                    smac_in.proto, smac_in.source, &smac_in.fid,
-//                                    smac_in.macaddress, smac_in.nexthoptype,
-//                                    &smac_in.nexthop);
-//
-//                            memcpy (pmac_in->proto, smac_in.proto + 1,
-//                                    strlen (smac_in.proto) - 3);
-//
-//                            memcpy (pmac_in->source, smac_in.source + 1,
-//                                    strlen (smac_in.source) - 3);
-//
-//                            pmac_in->fid = smac_in.fid;
-//
-//                            memcpy (pmac_in->macaddress, smac_in.macaddress + 1,
-//                                    strlen (smac_in.macaddress) - 3);
-//
-//                            memcpy (pmac_in->nexthoptype,
-//                                    smac_in.nexthoptype + 1,
-//                                    strlen (smac_in.nexthoptype) - 3);
-//
-//                            pmac_in->nexthop = smac_in.nexthop;
-//
-//                            list_add_tail (&pmac_in->list, &smac_head);
+                            strcpy (pesi.type, "ADD-ESI");
+
+                            char tmpbuf[1024];
+                            memset (tmpbuf, 0, sizeof(tmpbuf));
+
+                            nRet = fscanf (fp, "%*s%s %*s%d, %*s%s", sesi.name,
+                                           &sesi.nexthopcount, tmpbuf);
+
+                            memcpy (pesi.name, sesi.name + 1,
+                                    strlen (sesi.name) - 3);
+
+                            pesi.nexthopcount = sesi.nexthopcount;
+
+                            int count;
+                            count = do_esi (tmpbuf, pesi.nexthopifx);
+
+                            add_esi (&pesi);
 
                         }
+                    else if (strcmp (type, "\"DEL-MAC\",") == 0)
+                        {
 
+                            strcpy (pmac_in.type, "DEL-MAC");
+
+                            nRet = fscanf (fp, "%*s%s %*s%s %*s%d, %*s%s",
+                                           smac_in.proto, smac_in.source,
+                                           &smac_in.fid, smac_in.macaddress);
+
+                            memcpy (pmac_in.proto, smac_in.proto + 1,
+                                    strlen (smac_in.proto) - 3);
+
+                            memcpy (pmac_in.source, smac_in.source + 1,
+                                    strlen (smac_in.source) - 3);
+
+                            pmac_in.fid = smac_in.fid;
+
+                            memcpy (pmac_in.macaddress, smac_in.macaddress + 1,
+                                    strlen (smac_in.macaddress) - 2);
+
+                            /* 输入参数检查,入参错误时不加入链表*/
+                            valid = check_mac_in (&pmac_in, _DEL);
+                            if (valid < 0)
+                                {
+                                    valid = 0;
+                                    continue;
+                                }
+
+                            del_mac_in (&pmac_in);
+
+                        }
+                    else if (strcmp (type, "\"DEL-INT\",") == 0)
+                        {
+                            strcpy (pint_out.type, "DEL-INT");
+
+                            nRet = fscanf (fp, "%*s%d", &sint_out.ifx);
+
+                            pint_out.ifx = sint_out.ifx;
+
+                            /*检查ifx是否合法*/
+                            valid = check_ifx_nexthop (pint_out.ifx);
+                            if (valid < 0)
+                                {
+                                    valid = 0;
+                                    continue;
+                                }
+                            del_int_out (&pint_out);
+
+                        }
+                    else if (strcmp (type, "\"DEL-ESI\",") == 0)
+                        {
+                            strcpy (pesi.type, "DEL-ESI");
+
+                            nRet = fscanf (fp, "%*s%s", sesi.name);
+
+                            memcpy (pesi.name, sesi.name + 1,
+                                    strlen (sesi.name) - 2);
+
+                            del_esi (&pesi);
+
+                        }
                 }
             memset (type, 0, sizeof(type));
             memset (&smac_in, 0, sizeof(struct mac_in));
             memset (&pmac_in, 0, sizeof(struct mac_in));
             memset (&sint_out, 0, sizeof(struct int_out));
             memset (&pint_out, 0, sizeof(struct int_out));
+            memset (&sesi, 0, sizeof(struct esi));
+            memset (&pesi, 0, sizeof(struct esi));
+
         }
     return 0;
 }
@@ -202,12 +238,12 @@ vid_vni_show (struct mac_type *tmp, char *p)
     if (tmp->type == 0)
         {
             //VID
-            sprintf (p, "%d/%d", tmp->val, tmp->type);
+            sprintf (p, "%d/%d", tmp->val, 0);
         }
     else
         {
             //VNI
-            sprintf (p, "%d/%d", tmp->type, tmp->val);
+            sprintf (p, "%d/%d", 0, tmp->val);
         }
 }
 int
@@ -246,48 +282,10 @@ deal_with_cmd (FILE *fp)
                                                      pin->macaddress,
                                                      pin->source, pout->peerip);
                                         }
-                                    list_del_init (&pin->list);
                                 }
                         }
                 }
         }
-#if 0
-    memset (&tmp, 0, sizeof(struct mac_type));
-
-    /*遍历2 int*/
-    list_for_each_entry(pout,&int_head,list)
-        {
-            list_for_each_entry(pin,&mac_head,list)
-                {
-                    /*接口出口存在的时候才可连接*/
-                    if (pout->ifname && pout->ifx && pout->ifx == pin->nexthop)
-                        {
-                            fid2mac_type (pin->fid, &tmp);
-                            memset (buf, 0, sizeof(buf));
-                            vid_vni_show (&tmp, buf);
-//                            if (pin->priority == list_max)
-                                {
-                                    printf (" max= %d\n", list_max);
-                                    if (strcmp (pout->inttype, "ETHERNET") == 0)
-                                        {
-                                            fprintf (fp, "%s %s %s %s\n",
-                                                    buf,
-                                                    pin->macaddress,
-                                                    pin->source, pout->ifname);
-                                        }
-                                    else
-                                        {
-                                            fprintf (fp, "%s %s %s %s\n",
-                                                    buf,
-                                                    pin->macaddress,
-                                                    pin->source, pout->peerip);
-                                        }
-
-                                }
-                        }
-                }
-        }
-#endif
     return 0;
 }
 

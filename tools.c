@@ -84,3 +84,22 @@ conver_filename (char *infile, char *outfile)
         }
     return 0;
 }
+
+int
+do_esi (const char *in, int data[])
+{
+    char buf[1024 + 1];
+    memset (buf, 0, sizeof(buf));
+    memcpy (buf, in + 1, strlen (in) - 2);
+    char *token;
+    char *p = buf;
+    int *k = data;
+    int count = 0;
+    while ((token = strsep (&p, ",")) != NULL)
+        {
+            *k = atoi (token);
+            k++;
+            count++;
+        }
+    return count;
+}

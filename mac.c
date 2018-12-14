@@ -36,7 +36,6 @@ copy_to_mac_in (struct mac_in *p, struct mac_in *s)
     strcpy (p->macaddress, s->macaddress);
     strcpy (p->nexthoptype, s->nexthoptype);
     p->nexthop = s->nexthop;
-    p->priority = s->priority;
     return 0;
 }
 
@@ -62,7 +61,7 @@ look_up_mac_in (struct mac_in *s)
                     else
                         {
                             /*后来者优先级较高，更新*/
-                            copy_to_mac_in(p,s);
+                            copy_to_mac_in (p, s);
                             return p;
                         }
 
@@ -91,6 +90,27 @@ add_mac_in (struct mac_in *s)
     else
         {
             return 0;
+        }
+    return -1;
+}
+
+int
+del_mac_in (struct mac_in *s)
+{
+    struct mac_in *p = NULL;
+    struct mac_in *n;
+    int key;
+    int keytmp;
+    key = get_mac_in_key (s->fid, s->macaddress);
+    printf ("del mackey = %d\n", key);
+    list_for_each_entry_safe(p, n, &mac_head,list)
+        {
+            keytmp = get_mac_in_key (p->fid, p->macaddress);
+            if (key == keytmp)
+                {
+                    list_del_init (&p->list);
+                    free (p);
+                }
         }
     return -1;
 }
@@ -163,15 +183,85 @@ add_int_out (struct int_out *s)
     return -1;
 }
 
+int
+del_int_out (struct int_out *s)
+{
+    struct int_out *p,*n;
+
+    list_for_each_entry_safe(p, n, &int_head,list)
+        {
+            if(s->ifx == p->ifx)
+                {
+                    list_del_init(&p->list);
+                    free(p);
+                }
+        }
+    return 0;
+}
+
 u32
 get_int_out_key (int ifx)
 {
     return (jhash_1word (ifx, 0) % 1024);
 }
 
+/*ESI*/
+int
+copy_to_esi (struct esi *p, struct esi *s)
+{
+    int i;
+    strcpy (p->type, s->type);
+    strcpy (p->name, s->name);
+    p->nexthopcount = s->nexthopcount;
+    for (i = 0; i < sizeof(s->nexthopifx) / sizeof(int); ++i)
+        {
+            p->nexthopifx[i] = s->nexthopifx[i];
+        }
+    return 0;
+}
+
+int
+add_esi (struct esi *s)
+{
+    struct esi *p = NULL;
+    struct esi *n;
+    if (p == NULL)
+        {
+            p = (struct esi *) malloc (sizeof(struct esi));
+            if (p == NULL)
+                {
+                    return -1;
+                }
+            copy_to_esi (p, s);
+            list_add_tail (&p->list, &esi_head);
+            return 0;
+        }
+    else
+        {
+            return 0;
+        }
+    return -1;
+}
+
+int
+del_esi (struct esi *s)
+{
+    struct esi *p,*n;
+
+    list_for_each_entry_safe(p, n, &esi_head,list)
+        {
+            if(strcmp(s->name,p->name) == 0)
+                {
+                    list_del_init(&p->list);
+                    free(p);
+                }
+        }
+    return 0;
+}
+
 /* 过滤不合法的输入参数 */
 int
-check_mac_in (struct mac_in *p)
+check_mac_in (struct mac_in *p, int add_del)
 {
     int valid;
     valid = 0;
@@ -215,26 +305,31 @@ check_mac_in (struct mac_in *p)
         {
             return -1;
         }
-    /*检查nexthoptype是否合法*/
-    valid = 0;
-    for (i = 0; i < sizeof(strnexthoptype) / sizeof(strnexthoptype[0]); ++i)
+    /*添加时才检查*/
+    if (add_del == _ADD)
         {
-            if (strcmp (p->nexthoptype, strnexthoptype[i]) == 0)
+            /*检查nexthoptype是否合法*/
+            valid = 0;
+            for (i = 0; i < sizeof(strnexthoptype) / sizeof(strnexthoptype[0]);
+                    ++i)
                 {
-                    /*满足一个source项即可*/
-                    valid = 0;
-                    break;
+                    if (strcmp (p->nexthoptype, strnexthoptype[i]) == 0)
+                        {
+                            /*满足一个source项即可*/
+                            valid = 0;
+                            break;
+                        }
                 }
-        }
-    if (valid != 0)
-        {
-            return -1;
-        }
+            if (valid != 0)
+                {
+                    return -1;
+                }
 
-    /*检查nexthop是否合法*/
-    if (check_ifx_nexthop (p->nexthop) < 0)
-        {
-            return -1;
+            /*检查nexthop是否合法*/
+            if (check_ifx_nexthop (p->nexthop) < 0)
+                {
+                    return -1;
+                }
         }
     return 0;
 }
