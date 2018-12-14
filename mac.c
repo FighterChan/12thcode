@@ -44,7 +44,7 @@ struct mac_in *
 look_up_mac_in (struct mac_in *s)
 {
 
-    struct mac_in *p;
+    struct mac_in *p, *new;
     struct mac_in *n;
     u32 key, keytmp;
     key = get_mac_in_key (s->fid, s->macaddress);
@@ -52,11 +52,20 @@ look_up_mac_in (struct mac_in *s)
     list_for_each_entry_safe(p, n, &mac_head,list)
         {
             keytmp = get_mac_in_key (p->fid, p->macaddress);
-            if ((key == keytmp) && (strcmp (p->source, "STATIC") != 0))
+            if (key == keytmp)
                 {
-                    copy_to_mac_in (p, s);
+                    if (strcmp (p->source, "STATIC") == 0)
+                        {
+                            /*优先级最高，不更新*/
+                            return p;
+                        }
+                    else
+                        {
+                            /*后来者优先级较高，更新*/
+                            copy_to_mac_in(p,s);
+                            return p;
+                        }
 
-                    return p;
                 }
         }
     return NULL;

@@ -147,7 +147,7 @@ parse_cmd (FILE *fp)
                                     valid = 0;
                                     continue;
                                 }
-                                add_int_out (&pint_out);
+                            add_int_out (&pint_out);
 //                            list_add_tail (&pint_out.list, &int_head);
 
                         }
@@ -198,12 +198,27 @@ parse_cmd (FILE *fp)
     return 0;
 }
 
+void
+vid_vni_show (struct mac_type *tmp, char *p)
+{
+    if (tmp->type == 0)
+        {
+            //VID
+            sprintf (p, "%d/%d", tmp->val, tmp->type);
+        }
+    else
+        {
+            //VNI
+            sprintf (p, "%d/%d", tmp->type, tmp->val);
+        }
+}
 int
 deal_with_cmd (FILE *fp)
 {
     struct mac_in *pin, *nin;
     struct int_out *pout, *nout;
     int list_max = 0;
+    char buf[32];
 
     struct mac_type tmp;
     memset (&tmp, 0, sizeof(struct mac_type));
@@ -216,20 +231,21 @@ deal_with_cmd (FILE *fp)
                     if (pout->ifname && pout->ifx && pout->ifx == pin->nexthop)
                         {
                             fid2mac_type (pin->fid, &tmp);
-                            if (pin->priority == 0)
+
+                            memset (buf, 0, sizeof(buf));
+                            vid_vni_show (&tmp, buf);
+                            if (strcmp (pin->source, "STATIC") == 0)
                                 {
                                     if (strcmp (pout->inttype, "ETHERNET") == 0)
                                         {
-                                            fprintf (fp, "%d/%d %s %s %s\n",
-                                                     tmp.val, tmp.type,
+                                            fprintf (fp, "%s %s %s %s\n", buf,
                                                      pin->macaddress,
                                                      pin->source, pout->ifname);
                                         }
                                     else
                                         {
-                                            fprintf (fp, "%d/%d %s %s %s\n",
-                                                     tmp.val, tmp.type,
-                                                     pin->macaddress,
+                                            fprintf (fp, "%s %s %s %s\n",
+                                                     buf, pin->macaddress,
                                                      pin->source, pout->peerip);
                                         }
                                     list_del_init (&pin->list);
@@ -242,7 +258,7 @@ deal_with_cmd (FILE *fp)
                         }
                 }
         }
-
+#if 1
     memset (&tmp, 0, sizeof(struct mac_type));
 
     /*遍历2 int*/
@@ -254,20 +270,22 @@ deal_with_cmd (FILE *fp)
                     if (pout->ifname && pout->ifx && pout->ifx == pin->nexthop)
                         {
                             fid2mac_type (pin->fid, &tmp);
+                            memset (buf, 0, sizeof(buf));
+                            vid_vni_show (&tmp, buf);
 //                            if (pin->priority == list_max)
                                 {
                                     printf (" max= %d\n", list_max);
                                     if (strcmp (pout->inttype, "ETHERNET") == 0)
                                         {
-                                            fprintf (fp, "%d/%d %s %s %s\n",
-                                                     tmp.val, tmp.type,
+                                            fprintf (fp, "%s %s %s %s\n",
+                                                     buf,
                                                      pin->macaddress,
                                                      pin->source, pout->ifname);
                                         }
                                     else
                                         {
-                                            fprintf (fp, "%d/%d %s %s %s\n",
-                                                     tmp.val, tmp.type,
+                                            fprintf (fp, "%s %s %s %s\n",
+                                                     buf,
                                                      pin->macaddress,
                                                      pin->source, pout->peerip);
                                         }
@@ -276,6 +294,7 @@ deal_with_cmd (FILE *fp)
                         }
                 }
         }
+#endif
     return 0;
 }
 
@@ -310,8 +329,7 @@ main (int argc, char **argv)
             printf ("can not open file!\n");
             return -1;
         }
-    deal_with_cmd (outfp);
-    fclose (outfp);
+
 //    list_free();
     struct mac_in *p;
     list_for_each_entry(p,&mac_head,list)
@@ -336,6 +354,9 @@ main (int argc, char **argv)
             printf ("peerip:%s\n", p2->peerip);
             printf ("-----------------------------\n");
         }
+
+    deal_with_cmd (outfp);
+    fclose (outfp);
 
     return 0;
 }
