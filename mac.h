@@ -72,6 +72,7 @@ struct out_tab
     char macaddress[MACADDRESS_LEN];
     char source[SOURCE_LEN];
     char nexthop[NEXTHOP_LEN];
+    int flg;
     struct list_head list;
 };
 

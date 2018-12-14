@@ -76,7 +76,7 @@ conver_filename (char *infile, char *outfile)
     char *outpath = outfile;
     if ((token = strsep (&infile, ".")) != NULL)
         {
-            sprintf (outpath, "%s%s", token, "_result111.txt");
+            sprintf (outpath, "%s%s", token, "_result.txt");
         }
     else
         {

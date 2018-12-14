@@ -267,6 +267,7 @@ copy_to_out_tab (struct out_tab *p, struct out_tab *s)
     strcpy (p->macaddress, s->macaddress);
     strcpy (p->source, s->source);
     strcpy (p->nexthop, s->nexthop);
+    p->flg = s->flg;
     return 0;
 }
 

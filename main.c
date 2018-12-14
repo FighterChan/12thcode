@@ -175,7 +175,7 @@ parse_cmd (FILE *fp)
                             printf ("pesi.nexthopifx[1]=%d\n",
                                     pesi.nexthopifx[1]);
 //                            static_count = count;
-                            add_esi (&pesi,static_count);
+                            add_esi (&pesi, static_count);
 
                         }
                     else if (strcmp (type, "\"DEL-MAC\",") == 0)
@@ -307,6 +307,7 @@ deal_with_cmd (FILE *fp)
                                         {
                                             strcpy (stab.nexthop, pout->peerip);
                                         }
+                                    stab.flg = 0;
                                     add_out_tab (&stab);
                                 }
                         }
@@ -358,6 +359,7 @@ deal_with_cmd (FILE *fp)
                                                                             pout->peerip);
                                                                 }
                                                             /*添加out_table*/
+                                                            stab.flg = 1;
                                                             add_out_tab (&stab);
                                                         }
                                                 }
@@ -377,10 +379,27 @@ void
 show (FILE *fp)
 {
     struct out_tab *p, *n;
+    int i = 0;
     list_for_each_entry_safe(p,n,&out_head,list)
         {
-            fprintf (fp, "%s %s %s %s\n", p->strfid, p->macaddress, p->source,
-                     p->nexthop);
+            if (p->flg != 0)
+                {
+                    if (i == 0)
+                        {
+                            fprintf (fp, "%s %s %s %s\n", p->strfid,
+                                     p->macaddress, p->source, p->nexthop);
+                        }
+                    else
+                        {
+                            fprintf (fp, "%s\n", p->nexthop);
+                        }
+                    i++;
+                }
+            else
+                {
+                    fprintf (fp, "%s %s %s %s\n", p->strfid, p->macaddress,
+                             p->source, p->nexthop);
+                }
         }
 }
 int
