@@ -4,8 +4,8 @@
 
 struct mac_type
 {
-    unsigned char type;
-    int val;
+  unsigned char type;
+  int val;
 };
 
 int

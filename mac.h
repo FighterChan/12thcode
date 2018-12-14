@@ -33,49 +33,49 @@
 
 enum
 {
-    _ADD, _DEL
+  _ADD, _DEL
 };
 
 struct mac_in
 {
-    char type[TYPE_LEN];
-    char proto[ROTO_LEN];
-    char source[SOURCE_LEN];
-    int fid;
-    char macaddress[MACADDRESS_LEN];
-    char nexthoptype[NEXTHOPTYPE_LEN];
-    char nexthop[NEXTHOP_LEN];
-    struct list_head list;
+  char type[TYPE_LEN];
+  char proto[ROTO_LEN];
+  char source[SOURCE_LEN];
+  int fid;
+  char macaddress[MACADDRESS_LEN];
+  char nexthoptype[NEXTHOPTYPE_LEN];
+  char nexthop[NEXTHOP_LEN];
+  struct list_head list;
 };
 
 struct int_out
 {
-    char type[TYPE_LEN];
-    char inttype[INTTYPE_LEN];
-    int ifx;
-    char ifname[IFNAME_LEN];
-    char peerip[PEERIP_LEN];
-    struct list_head list;
+  char type[TYPE_LEN];
+  char inttype[INTTYPE_LEN];
+  int ifx;
+  char ifname[IFNAME_LEN];
+  char peerip[PEERIP_LEN];
+  struct list_head list;
 };
 
 struct esi
 {
-    char type[TYPE_LEN];
-    char name[NAME_LEN];
-    int nexthopcount;
-    int nexthopifx[NEXTHOPIFX_LEN];
-    struct list_head list;
+  char type[TYPE_LEN];
+  char name[NAME_LEN];
+  int nexthopcount;
+  int nexthopifx[NEXTHOPIFX_LEN];
+  struct list_head list;
 };
 
 struct out_tab
 {
-    char strfid[STRFID_LEN];
-    char macaddress[MACADDRESS_LEN];
-    char source[SOURCE_LEN];
-    char nexthop[NEXTHOP_LEN];
-    int flg;
-    struct mac_type set;
-    struct list_head list;
+  char strfid[STRFID_LEN];
+  char macaddress[MACADDRESS_LEN];
+  char source[SOURCE_LEN];
+  char nexthop[NEXTHOP_LEN];
+  int flg;
+  struct mac_type set;
+  struct list_head list;
 };
 
 /*全局变量*/
