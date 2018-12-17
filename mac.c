@@ -452,8 +452,6 @@ check_mac_in (struct mac_in *p, int add_del)
   int i;
   for (i = 0; strproto[i]; i++)
     {
-      printf ("p->proto = %s\n", p->proto);
-
       if (strcmp (p->proto, strproto[i]) == 0)
         {
           /*满足一个proto项即可*/

@@ -158,7 +158,6 @@ parse_cmd (FILE *fp)
 
               printf ("\n------------------>>>%s\n", tmpbuf);
 
-//                            int count;
               static_count = do_esi (tmpbuf, pesi.nexthopifx);
               printf ("\ncount------------%d\n", static_count);
 
@@ -313,8 +312,8 @@ deal_with_cmd (FILE *fp)
         {
           if (strcmp (pin->nexthoptype, "ESI") == 0)
             {
-              printf ("pesi->name:%s\n", pesi->name);
-              printf ("pin->nexthop:%s\n", pin->nexthop);
+//              printf ("pesi->name:%s\n", pesi->name);
+//              printf ("pin->nexthop:%s\n", pin->nexthop);
 
               if (strcmp (pesi->name, pin->nexthop) == 0)
                 {
