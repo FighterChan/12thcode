@@ -1,0 +1,378 @@
+[
+	{
+		type: "ADD-MAC",
+		proto: "DOT1Q",
+		source: "MLAG",
+		fid: 1,
+		macaddress: "0000.0000.0001",
+		nexthoptype: "INTERFACE",
+		nexthop: 1
+	},
+	{
+		type: "ADD-MAC",
+		proto: "DOT1Q",
+		source: "EVPN",
+		fid: 2,
+		macaddress: "0000.0000.0002",
+		nexthoptype: "INTERFACE",
+		nexthop: 2
+	},
+	{
+		type: "ADD-MAC",
+		proto: "DOT1Q",
+		source: "LOCAL",
+		fid: 3,
+		macaddress: "0000.0000.0003",
+		nexthoptype: "INTERFACE",
+		nexthop: 3
+	},
+	{
+		type: "ADD-MAC",
+		proto: "DOT1Q",
+		source: "STATIC",
+		fid: 4,
+		macaddress: "0000.0000.0004",
+		nexthoptype: "INTERFACE",
+		nexthop: 4
+	},
+	{
+		type: "ADD-MAC",
+		proto: "DOT1Q",
+		source: "MLAG",
+		fid: 5,
+		macaddress: "0000.0000.0005",
+		nexthoptype: "INTERFACE",
+		nexthop: 6001
+	},
+	{
+		type: "ADD-MAC",
+		proto: "DOT1Q",
+		source: "EVPN",
+		fid: 6,
+		macaddress: "0000.0000.0006",
+		nexthoptype: "INTERFACE",
+		nexthop: 6002
+	},
+	{
+		type: "ADD-MAC",
+		proto: "DOT1Q",
+		source: "LOCAL",
+		fid: 7,
+		macaddress: "0000.0000.0007",
+		nexthoptype: "INTERFACE",
+		nexthop: 6003
+	},
+	{
+		type: "ADD-MAC",
+		proto: "DOT1Q",
+		source: "STATIC",
+		fid: 8,
+		macaddress: "0000.0000.0008",
+		nexthoptype: "INTERFACE",
+		nexthop: 6004
+	},
+	{
+		type: "ADD-MAC",
+		proto: "VXLAN",
+		source: "MLAG",
+		fid: 16778216,
+		macaddress: "0000.0000.0001",
+		nexthoptype: "INTERFACE",
+		nexthop: 1
+	},
+	{
+		type: "ADD-MAC",
+		proto: "VXLAN",
+		source: "EVPN",
+		fid: 16778217,
+		macaddress: "0000.0000.0002",
+		nexthoptype: "INTERFACE",
+		nexthop: 2
+	},
+	{
+		type: "ADD-MAC",
+		proto: "VXLAN",
+		source: "LOCAL",
+		fid: 16778218,
+		macaddress: "0000.0000.0003",
+		nexthoptype: "INTERFACE",
+		nexthop: 3
+	},
+	{
+		type: "ADD-MAC",
+		proto: "VXLAN",
+		source: "STATIC",
+		fid: 16778219,
+		macaddress: "0000.0000.0004",
+		nexthoptype: "INTERFACE",
+		nexthop: 4
+	},
+	{
+		type: "ADD-MAC",
+		proto: "VXLAN",
+		source: "MLAG",
+		fid: 16778220,
+		macaddress: "0000.0000.0005",
+		nexthoptype: "INTERFACE",
+		nexthop: 6001
+	},
+	{
+		type: "ADD-MAC",
+		proto: "VXLAN",
+		source: "EVPN",
+		fid: 16778221,
+		macaddress: "0000.0000.0006",
+		nexthoptype: "INTERFACE",
+		nexthop: 6002
+	},
+	{
+		type: "ADD-MAC",
+		proto: "VXLAN",
+		source: "LOCAL",
+		fid: 16778222,
+		macaddress: "0000.0000.0007",
+		nexthoptype: "INTERFACE",
+		nexthop: 6003
+	},
+	{
+		type: "ADD-MAC",
+		proto: "VXLAN",
+		source: "STATIC",
+		fid: 16778223,
+		macaddress: "0000.0000.0008",
+		nexthoptype: "INTERFACE",
+		nexthop: 6004
+	},
+	{
+		type: "ADD-INT",
+		inttype: "ETHERNET",
+		ifx: 1,
+		ifname: "int0/1"
+	},
+	{
+		type: "ADD-INT",
+		inttype: "ETHERNET",
+		ifx: 2,
+		ifname: "int0/2"
+	},
+	{
+		type: "ADD-INT",
+		inttype: "ETHERNET",
+		ifx: 3,
+		ifname: "int0/3"
+	},
+	{
+		type: "ADD-INT",
+		inttype: "ETHERNET",
+		ifx: 4,
+		ifname: "int0/4"
+	},
+	{
+		type: "ADD-INT",
+		inttype: "TUNNEL",
+		ifx: 6001,
+		ifname: "tunnel1",
+		peerip: "1.1.1.1"
+	},
+	{
+		type: "ADD-INT",
+		inttype: "TUNNEL",
+		ifx: 6002,
+		ifname: "tunnel1",
+		peerip: "2.2.2.2"
+	},
+	{
+		type: "ADD-INT",
+		inttype: "TUNNEL",
+		ifx: 6003,
+		ifname: "tunnel1",
+		peerip: "3.3.3.3"
+	},
+	{
+		type: "ADD-INT",
+		inttype: "TUNNEL",
+		ifx: 6004,
+		ifname: "tunnel1",
+		peerip: "4.4.4.4"
+	},
+	{
+		type: "ADD-MAC",
+		proto: "DOT1Q",
+		source: "MLAG",
+		fid: 5,
+		macaddress: "0000.0000.0001",
+		nexthoptype: "ESI",
+		nexthop: "ESI1"
+	},
+	{
+		type: "ADD-MAC",
+		proto: "DOT1Q",
+		source: "EVPN",
+		fid: 6,
+		macaddress: "0000.0000.0002",
+		nexthoptype: "ESI",
+		nexthop: "ESI2"
+	},
+	{
+		type: "ADD-MAC",
+		proto: "DOT1Q",
+		source: "LOCAL",
+		fid: 7,
+		macaddress: "0000.0000.0003",
+		nexthoptype: "ESI",
+		nexthop: "ESI3"
+	},
+	{
+		type: "ADD-MAC",
+		proto: "DOT1Q",
+		source: "STATIC",
+		fid: 8,
+		macaddress: "0000.0000.0004",
+		nexthoptype: "ESI",
+		nexthop: "ESI4"
+	},    
+	{
+		type: "ADD-MAC",
+		proto: "VXLAN",
+		source: "MLAG",
+		fid: 16778216,
+		macaddress: "0000.0000.0005",
+		nexthoptype: "ESI",
+		nexthop: "ESI1"
+	},
+	{
+		type: "ADD-MAC",
+		proto: "VXLAN",
+		source: "EVPN",
+		fid: 16778217,
+		macaddress: "0000.0000.0006",
+		nexthoptype: "ESI",
+		nexthop: "ESI2"
+	},
+	{
+		type: "ADD-MAC",
+		proto: "VXLAN",
+		source: "LOCAL",
+		fid: 16778218,
+		macaddress: "0000.0000.0007",
+		nexthoptype: "ESI",
+		nexthop: "ESI3"
+	},
+	{
+		type: "ADD-MAC",
+		proto: "VXLAN",
+		source: "STATIC",
+		fid: 16778219,
+		macaddress: "0000.0000.0008",
+		nexthoptype: "ESI",
+		nexthop: "ESI4"
+	},  
+	{
+		type: "ADD-ESI",
+		name: "ESI1",
+		nexthopcount: 4,
+		nexthopifx: [6001, 6002, 6003, 6004]
+	},
+	{
+		type: "ADD-ESI",
+		name: "ESI2",
+		nexthopcount: 4,
+		nexthopifx: [6001, 6002, 6003, 6004]
+	},
+	{
+		type: "ADD-ESI",
+		name: "ESI3",
+		nexthopcount: 4,
+		nexthopifx: [6001, 6002, 6003, 6004]
+	},
+	{
+		type: "ADD-ESI",
+		name: "ESI4",
+		nexthopcount: 4,
+		nexthopifx: [6001, 6002, 6003, 6004]
+	},
+	{
+		type: "ADD-MAC",
+		proto: "FOOL",
+		source: "MLAG",
+		fid: 88,
+		macaddress: "0000.0000.0001",
+		nexthoptype: "INTERFACE",
+		nexthop: 1
+	},   
+	{
+		type: "ADD-MAC",
+		proto: "DOT1Q",
+		source: "FOOL",
+		fid: 89,
+		macaddress: "0000.0000.0001",
+		nexthoptype: "INTERFACE",
+		nexthop: 1
+	},     
+	{
+		type: "ADD-MAC",
+		proto: "DOT1Q",
+		source: "MLAG",
+		fid: 5000,
+		macaddress: "0000.0000.0001",
+		nexthoptype: "INTERFACE",
+		nexthop: 1
+	},    
+	{
+		type: "ADD-MAC",
+		proto: "VXLAN",
+		source: "MLAG",
+		fid: 5001,
+		macaddress: "0000.0000.0001",
+		nexthoptype: "INTERFACE",
+		nexthop: 1
+	},     
+	{
+		type: "ADD-MAC",
+		proto: "VXLAN",
+		source: "MLAG",
+		fid: 34672913,
+		macaddress: "0000.0000.0001",
+		nexthoptype: "INTERFACE",
+		nexthop: 1
+	}, 
+	{
+		type: "ADD-MAC",
+		proto: "DOT1Q",
+		source: "MLAG",
+		fid: 90,
+		macaddress: "0000.0000.0001",
+		nexthoptype: "FOOL",
+		nexthop: 1
+	},    
+	{
+		type: "ADD-MAC",
+		proto: "DOT1Q",
+		source: "MLAG",
+		fid: 91,
+		macaddress: "0000.0000.0001",
+		nexthoptype: "INTERFACE",
+		nexthop: 75555
+	},  
+	{
+		type: "ADD-INT",
+		inttype: "ETHERNET",
+		ifx: 75555,
+		ifname: "int0/75555"
+	},   
+	{
+		type: "ADD-MAC",
+		proto: "DOT1Q",
+		source: "MLAG",
+		fid: 92,
+		macaddress: "0000.0000.0001",
+		nexthoptype: "INTERFACE",
+		nexthop: 77
+	},  
+	{
+		type: "ADD-INT",
+		inttype: "FOOL",
+		ifx: 77,
+		ifname: "int0/77"
+	}
+]
