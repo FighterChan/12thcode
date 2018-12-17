@@ -1,0 +1,36 @@
+EXE TEST0 success:./mac.elf input1.txt
+EXE TEST1 error:./mac.elf input2.txt
+error-log:
+Error: Command failed: ./mac.elf input2.txt
+Segmentation fault (core dumped)
+
+EXE TEST2 success:./mac.elf input3.txt
+EXE TEST3 success:./mac.elf input4.txt
+EXE TEST4 error:./mac.elf input5.txt
+error-log:
+Error: Command failed: ./mac.elf input5.txt
+Segmentation fault (core dumped)
+
+CHECK TEST1 ERROR:input2_result.txtNOT exist
+CHECK TEST4 ERROR:input5_result.txtNOT exist
+CHECK TEST0: compare input1_result.txt to std answer std_input1_result.txt
+  ERROR:word different:
+  line_index_output=0 words_output=2/0,0000.0000.0002,EVPN,int0/2
+  line_index_std=0words_std=1/0,0000.0000.0001,MLAG,int0/1
+  result : FALSE
+CHECK TEST2: compare input3_result.txt to std answer std_input3_result.txt
+  ERROR:word different:
+  line_index_output=0 words_output=0/1001,0000.0000.0002,EVPN,int0/2
+  line_index_std=0words_std=1/0,0000.0000.0001,EVPN,int0/1
+  result : FALSE
+CHECK TEST3: compare input4_result.txt to std answer std_input4_result.txt
+  ERROR:word different:
+  line_index_output=0 words_output=6/0,0000.0000.0006,EVPN,2.2.2.2
+  line_index_std=0words_std=2/0,0000.0000.0002,EVPN,int0/2
+  result : FALSE
+test0:0
+test1:0
+test2:0
+test3:0
+test4:0
+final_score:0
