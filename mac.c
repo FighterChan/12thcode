@@ -17,13 +17,13 @@
 #include "tools.h"
 
 char *strproto[8] =
-  { "VXLAN", "DOT1Q" };
+  { "VXLAN", "DOT1Q", NULL };
 
 char *strsource[8] =
-  { "STATIC", "LOCAL", "MLAG", "EVPN" };
+  { "STATIC", "LOCAL", "MLAG", "EVPN", NULL };
 
 char *strnexthoptype[16] =
-  { "INTERFACE", "ESI" };
+  { "INTERFACE", "ESI", NULL };
 
 int
 copy_to_mac_in (struct mac_in *p, struct mac_in *s)
@@ -450,14 +450,17 @@ check_mac_in (struct mac_in *p, int add_del)
     }
   /*检查proto是否合法*/
   int i;
-  for (i = 0; i < sizeof(strproto) / sizeof(strproto[0]); i++)
+  for (i = 0; strproto[i]; i++)
     {
+      printf ("p->proto = %s\n", p->proto);
+
       if (strcmp (p->proto, strproto[i]) == 0)
         {
           /*满足一个proto项即可*/
           valid = 0;
           break;
         }
+
     }
   if (valid != 0)
     {
@@ -465,7 +468,7 @@ check_mac_in (struct mac_in *p, int add_del)
     }
   /*检查source是否合法*/
   valid = 0;
-  for (i = 0; i < sizeof(strsource) / sizeof(strsource[0]); ++i)
+  for (i = 0; strsource[i]; i++)
     {
       if (strcmp (p->source, strsource[i]) == 0)
         {
@@ -483,7 +486,7 @@ check_mac_in (struct mac_in *p, int add_del)
     {
       /*检查nexthoptype是否合法*/
       valid = 0;
-      for (i = 0; i < sizeof(strnexthoptype) / sizeof(strnexthoptype[0]); ++i)
+      for (i = 0; strnexthoptype[i]; i++)
         {
           if (strcmp (p->nexthoptype, strnexthoptype[i]) == 0)
             {

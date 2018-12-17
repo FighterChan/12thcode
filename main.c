@@ -95,6 +95,7 @@ parse_cmd (FILE *fp)
 
               /* 输入参数检查,入参错误时不加入链表*/
               valid = check_mac_in (&pmac_in, _ADD);
+
               if (valid < 0)
                 {
                   valid = 0;
@@ -161,9 +162,11 @@ parse_cmd (FILE *fp)
               static_count = do_esi (tmpbuf, pesi.nexthopifx);
               printf ("\ncount------------%d\n", static_count);
 
-              printf ("pesi.nexthopifx[0]=%d\n", pesi.nexthopifx[0]);
-              printf ("pesi.nexthopifx[1]=%d\n", pesi.nexthopifx[1]);
-//                            static_count = count;
+              int i;
+              for (i = 0; i < static_count; ++i)
+                {
+                  printf ("pesi.nexthopifx[i]=%d\n", pesi.nexthopifx[i]);
+                }
               add_esi (&pesi, static_count);
 
             }
