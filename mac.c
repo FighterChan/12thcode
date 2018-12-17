@@ -74,7 +74,7 @@ add_mac_in (struct mac_in *s)
 {
   struct mac_in *p = NULL;
   struct mac_in *n;
-//  p = look_up_mac_in (s);
+  p = look_up_mac_in (s);
   if (p == NULL)
     {
       p = (struct mac_in *) malloc (sizeof(struct mac_in));
@@ -178,7 +178,7 @@ add_int_out (struct int_out *s)
 {
   struct int_out *p = NULL;
   struct int_out *n;
-  p = look_up_int_out (s);
+//  p = look_up_int_out (s);
   if (p == NULL)
     {
       p = (struct int_out *) malloc (sizeof(struct int_out));
@@ -443,7 +443,7 @@ check_mac_in (struct mac_in *p, int add_del)
     }
   /*检查proto是否合法*/
   int i;
-  for (i = 0; strproto[i]; i++)
+  for (i = 0; strproto[i] != NULL; i++)
     {
       if (strcmp (p->proto, strproto[i]) == 0)
         {
@@ -453,13 +453,13 @@ check_mac_in (struct mac_in *p, int add_del)
         }
 
     }
-  if (valid != 0)
-    {
-      return -1;
-    }
+//  if (valid != 0)
+//    {
+//      return -1;
+//    }
   /*检查source是否合法*/
-  valid = 0;
-  for (i = 0; strsource[i]; i++)
+//  valid = 0;
+  for (i = 0; strsource[i] != NULL; i++)
     {
       if (strcmp (p->source, strsource[i]) == 0)
         {
@@ -468,7 +468,12 @@ check_mac_in (struct mac_in *p, int add_del)
           break;
         }
     }
-  if (valid != 0)
+//  if (valid != 0)
+//    {
+//      return -1;
+//    }
+
+  if(valid < 0)
     {
       return -1;
     }
@@ -477,7 +482,7 @@ check_mac_in (struct mac_in *p, int add_del)
     {
       /*检查nexthoptype是否合法*/
       valid = 0;
-      for (i = 0; strnexthoptype[i]; i++)
+      for (i = 0; strnexthoptype[i] != NULL; i++)
         {
           if (strcmp (p->nexthoptype, strnexthoptype[i]) == 0)
             {
@@ -486,10 +491,10 @@ check_mac_in (struct mac_in *p, int add_del)
               break;
             }
         }
-      if (valid != 0)
-        {
-          return -1;
-        }
+//      if (valid != 0)
+//        {
+//          return -1;
+//        }
 
       /*检查nexthop是否合法*/
       if (strcmp (p->nexthoptype, "INTERFACE") == 0)

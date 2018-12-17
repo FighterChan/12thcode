@@ -46,12 +46,16 @@ fid2mac_type (int fid, struct mac_type *p)
 {
   int nRet;
   struct mac_type *tmp = p;
+//  printf("vid = %d\n",fid);
 
   tmp->type = (unsigned char) (fid >> 24);
   tmp->val = (fid & 0xffffff);
+//  printf("vid_type = %d\n",tmp->type);
+//  printf("vid_val = %d\n",tmp->val);
+
   nRet = mac_type2fid (tmp);
 
-  if (nRet < 0)
+  if (nRet < 0 || tmp->type > 1 || tmp->type < 0)
     {
       return -1;
     }
