@@ -12,7 +12,6 @@
 #include "tools.h"
 
 #define MAX(X,Y) ((X)>(Y)?(X):(Y))
-#define MIN(X,Y) ((X)<(Y)?(X):(Y))
 
 #define TYPE_LEN 16
 #define ROTO_LEN 16
@@ -128,22 +127,5 @@ free_list (void);
 
 int
 sort_out_tab (struct out_tab *new);
-
-void
-insert_sort (struct list_head *head, int
-(*cmp) (struct list_head *a, struct list_head *b));
-
-int
-cmp_macaddress (struct list_head *a, struct list_head *b);
-
-int
-cmp_proto_val (struct list_head *a, struct list_head *b);
-
-int
-cmp_proto_type (struct list_head *a, struct list_head *b);
-
-void
-bubble_sort (struct list_head *head, int
-(*compar) (struct list_head *, struct list_head *));
 
 #endif /* MAC_H_ */

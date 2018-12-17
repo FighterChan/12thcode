@@ -9,6 +9,7 @@
  * 
  *  
  */
+#if 1
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -16,13 +17,13 @@
 #include "tools.h"
 
 char *strproto[8] =
-  { "VXLAN", "DOT1Q", NULL };
+  { "VXLAN", "DOT1Q" };
 
 char *strsource[8] =
-  { "STATIC", "LOCAL", "MLAG", "EVPN", NULL };
+  { "STATIC", "LOCAL", "MLAG", "EVPN" };
 
 char *strnexthoptype[16] =
-  { "INTERFACE", "ESI", NULL };
+  { "INTERFACE", "ESI" };
 
 int
 copy_to_mac_in (struct mac_in *p, struct mac_in *s)
@@ -74,7 +75,7 @@ add_mac_in (struct mac_in *s)
 {
   struct mac_in *p = NULL;
   struct mac_in *n;
-//  p = look_up_mac_in (s);
+  p = look_up_mac_in (s);
   if (p == NULL)
     {
       p = (struct mac_in *) malloc (sizeof(struct mac_in));
@@ -328,9 +329,8 @@ add_out_tab (struct out_tab *s)
     }
 
   copy_to_out_tab (p, s);
-
-//  sort_out_tab (p);
-  list_add_tail (&p->list, &out_head);
+  sort_out_tab (p);
+//    list_add_tail (&p->list, &out_head);
   return 0;
 }
 
@@ -369,22 +369,18 @@ sort_out_tab (struct out_tab *new)
 {
 
   struct out_tab *p, *n;
+  struct out_tab *tmp;
   if (list_empty (&out_head))
     {
-      list_add (&new->list, &out_head);
+      list_add_tail (&new->list, &out_head);
       return 0;
     }
-
   list_for_each_entry_safe(p,n,&out_head,list)
     {
       if (new->set.type == p->set.type && new->set.val == p->set.val)
         {
+          tmp = p;
           if (strcmp (new->macaddress, p->macaddress) > 0)
-            {
-              list_add_tail (&new->list, &p->list);
-              return 0;
-            }
-          else
             {
               list_add (&new->list, &p->list);
               return 0;
@@ -392,36 +388,47 @@ sort_out_tab (struct out_tab *new)
         }
     }
 
+  if (tmp != NULL)
+    {
+      list_add_tail (&new->list, &tmp->list);
+      return 0;
+    }
+
+  tmp = NULL;
   list_for_each_entry_safe(p,n,&out_head,list)
     {
       if (new->set.type == p->set.type)
         {
+          tmp = p;
           if (new->set.val > p->set.val)
-            {
-              list_add_tail (&new->list, &p->list);
-              return 0;
-            }
-          else
             {
               list_add (&new->list, &p->list);
               return 0;
             }
         }
     }
+  if (tmp != NULL)
+    {
+      list_add_tail (&new->list, &tmp->list);
+      return 0;
+    }
 
+  tmp = NULL;
   list_for_each_entry_safe(p,n,&out_head,list)
     {
+      tmp = p;
       if (new->set.type > p->set.type)
-        {
-          list_add_tail (&new->list, &p->list);
-          return 0;
-        }
-      else
         {
           list_add (&new->list, &p->list);
           return 0;
         }
     }
+  if (tmp != NULL)
+    {
+      list_add_tail (&new->list, &tmp->list);
+      return 0;
+    }
+  list_add_tail (&new->list, &out_head);
   return 0;
 }
 
@@ -443,7 +450,7 @@ check_mac_in (struct mac_in *p, int add_del)
     }
   /*检查proto是否合法*/
   int i;
-  for (i = 0; strproto[i]; i++)
+  for (i = 0; i < sizeof(strproto) / sizeof(strproto[0]); i++)
     {
       if (strcmp (p->proto, strproto[i]) == 0)
         {
@@ -451,7 +458,6 @@ check_mac_in (struct mac_in *p, int add_del)
           valid = 0;
           break;
         }
-
     }
   if (valid != 0)
     {
@@ -459,7 +465,7 @@ check_mac_in (struct mac_in *p, int add_del)
     }
   /*检查source是否合法*/
   valid = 0;
-  for (i = 0; strsource[i]; i++)
+  for (i = 0; i < sizeof(strsource) / sizeof(strsource[0]); ++i)
     {
       if (strcmp (p->source, strsource[i]) == 0)
         {
@@ -477,7 +483,7 @@ check_mac_in (struct mac_in *p, int add_del)
     {
       /*检查nexthoptype是否合法*/
       valid = 0;
-      for (i = 0; strnexthoptype[i]; i++)
+      for (i = 0; i < sizeof(strnexthoptype) / sizeof(strnexthoptype[0]); ++i)
         {
           if (strcmp (p->nexthoptype, strnexthoptype[i]) == 0)
             {
@@ -510,112 +516,4 @@ check_mac_in (struct mac_in *p, int add_del)
     }
   return 0;
 }
-
-int
-cmp_proto_type (struct list_head *a, struct list_head *b)
-{
-  struct out_tab *pa = list_entry(a, struct out_tab, list);
-  struct out_tab *pb = list_entry(b, struct out_tab, list);
-  return (pa->set.type - pb->set.type);
-}
-
-int
-cmp_proto_val (struct list_head *a, struct list_head *b)
-{
-  struct out_tab *pa = list_entry(a, struct out_tab, list);
-  struct out_tab *pb = list_entry(b, struct out_tab, list);
-  if (pa->set.type == pb->set.type)
-    {
-      return (pa->set.val - pb->set.val);
-    }
-  else
-    {
-      return 0;
-    }
-}
-
-int
-cmp_macaddress (struct list_head *a, struct list_head *b)
-{
-  struct out_tab *pa = list_entry(a, struct out_tab, list);
-  struct out_tab *pb = list_entry(b, struct out_tab, list);
-  if (pa->set.val == pb->set.val)
-    {
-      return (strcmp (pa->macaddress, pb->macaddress));
-    }
-  else
-    {
-      return 0;
-    }
-}
-
-int
-cmd_out (struct list_head *a, struct list_head *b)
-{
-  struct out_tab *pa = list_entry(a, struct out_tab, list);
-  struct out_tab *pb = list_entry(b, struct out_tab, list);
-  return 0;
-}
-
-void
-swap (struct list_head *a, struct list_head *b)
-{
-  struct list_head flag =
-    { NULL, NULL };
-  __list_add (&flag, b->prev, b);
-  list_del (b);
-  __list_add (b, a->prev, a);
-  list_del (a);
-  __list_add (a, flag.prev, &flag);
-  list_del (&flag);
-}
-
-void
-insert_sort (struct list_head *head, int
-(*cmp) (struct list_head *a, struct list_head *b))
-{
-
-  struct list_head *i, *j, *temp;
-  i = head->next->next;   //i指向第2个结点
-  list_for_each_from(i,head)
-    { //i从第2个结点开始遍历,因为第1个已经有序
-      j = i->prev;  //j指向i的前一个结点
-
-      if (cmp (j, i) <= 0) //从表头开始，按照升序排列
-        continue;
-      list_for_each_reverse_continue(j,head)
-        {
-          if (cmp (j, i) <= 0)
-            break;
-        }
-      temp = i->next; //因为下文要删除i结点，所以记录i结点的下一个结点
-      list_del (i);
-      __list_add (i, j, j->next); //把i插入到j的后面
-      i = temp->prev; //i指针归位
-    }
-}
-
-void
-bubble_sort (struct list_head *head, int
-(*compar) (struct list_head *, struct list_head *))
-{
-  struct list_head *start = NULL;
-  struct list_head *end = NULL;
-  list_for_each_reverse (end, head)
-    {
-      list_for_each(start, head)
-        {
-          if (start == end)
-            break;
-
-          if (compar (start, start->next) > 0)
-            {
-              swap (start, start->next);
-              start = start->prev; //start归位
-              if (start == end)
-                end = end->next; //end归位
-            }
-        }
-    }
-}
-
+#endif

@@ -1,0 +1,58 @@
+[
+	{
+		type: "ADD-MAC",
+		proto: "DOT1Q",
+		source: "MLAG",
+		fid: 1024,
+		macaddress: "0000.0000.0001",
+		nexthoptype: "INTERFACE",
+		nexthop: 1
+	},
+	{
+		type: "ADD-MAC",
+		proto: "DOT1Q",
+		source: "EVPN",
+		fid: 1024,
+		macaddress: "0000.0000.0001",
+		nexthoptype: "INTERFACE",
+		nexthop: 2
+	},
+	{
+		type: "ADD-MAC",
+		proto: "DOT1Q",
+		source: "STATIC",
+		fid: 1,
+		macaddress: "0000.0000.0002",
+		nexthoptype: "INTERFACE",
+		nexthop: 2
+	},
+	{
+		type: "ADD-MAC",
+		proto: "DOT1Q",
+		source: "LOCAL",
+		fid: 1,
+		macaddress: "0000.0000.0002",
+		nexthoptype: "INTERFACE",
+		nexthop: 3
+	},
+	{
+		type: "ADD-INT",
+		inttype: "ETHERNET",
+		ifx: 1,
+		ifname: "int0/1"
+	},
+	{
+		type: "ADD-INT",
+		inttype: "TUNNEL",
+		ifx: 2,
+		ifname: "tunnel1",
+		peerip: "4.4.4.4"
+	},
+	{
+		type: "ADD-INT",
+		inttype: "TUNNEL",
+		ifx: 3,
+		ifname: "tunnel2",
+		peerip: "5.5.5.5"
+	}
+]

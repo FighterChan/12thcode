@@ -584,9 +584,6 @@ static inline void list_splice_tail_init(struct list_head *list,
 #define list_safe_reset_next(pos, n, member)				\
 	n = list_next_entry(pos, member)
 
-#define  list_for_each_reverse_continue(cur, head) \
-    for (cur = (cur)->prev; cur != (head); cur = (cur)->prev)
-
 /*
  * Double linked lists with a single pointer list head.
  * Mostly useful for hash tables where the two pointer list head is
@@ -766,8 +763,5 @@ static inline void list_del_range(struct list_head *begin,
  */
 #define list_for_each_from(pos, head) \
 	for (; pos != (head); pos = pos->next)
-
-#define  list_for_each_reverse(cur, head)   \
-    for (cur = (head)->prev; cur != head; cur = (cur)->prev)
 
 #endif /* _LIST_H */
