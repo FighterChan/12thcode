@@ -75,7 +75,7 @@ add_mac_in (struct mac_in *s)
 {
   struct mac_in *p = NULL;
   struct mac_in *n;
-  p = look_up_mac_in (s);
+//  p = look_up_mac_in (s);
   if (p == NULL)
     {
       p = (struct mac_in *) malloc (sizeof(struct mac_in));
@@ -369,18 +369,22 @@ sort_out_tab (struct out_tab *new)
 {
 
   struct out_tab *p, *n;
-  struct out_tab *tmp;
   if (list_empty (&out_head))
     {
-      list_add_tail (&new->list, &out_head);
+      list_add (&new->list, &out_head);
       return 0;
     }
+
   list_for_each_entry_safe(p,n,&out_head,list)
     {
       if (new->set.type == p->set.type && new->set.val == p->set.val)
         {
-          tmp = p;
           if (strcmp (new->macaddress, p->macaddress) > 0)
+            {
+              list_add_tail (&new->list, &p->list);
+              return 0;
+            }
+          else
             {
               list_add (&new->list, &p->list);
               return 0;
@@ -388,47 +392,36 @@ sort_out_tab (struct out_tab *new)
         }
     }
 
-  if (tmp != NULL)
-    {
-      list_add_tail (&new->list, &tmp->list);
-      return 0;
-    }
-
-  tmp = NULL;
   list_for_each_entry_safe(p,n,&out_head,list)
     {
       if (new->set.type == p->set.type)
         {
-          tmp = p;
           if (new->set.val > p->set.val)
+            {
+              list_add_tail (&new->list, &p->list);
+              return 0;
+            }
+          else
             {
               list_add (&new->list, &p->list);
               return 0;
             }
         }
     }
-  if (tmp != NULL)
-    {
-      list_add_tail (&new->list, &tmp->list);
-      return 0;
-    }
 
-  tmp = NULL;
   list_for_each_entry_safe(p,n,&out_head,list)
     {
-      tmp = p;
       if (new->set.type > p->set.type)
+        {
+          list_add_tail (&new->list, &p->list);
+          return 0;
+        }
+      else
         {
           list_add (&new->list, &p->list);
           return 0;
         }
     }
-  if (tmp != NULL)
-    {
-      list_add_tail (&new->list, &tmp->list);
-      return 0;
-    }
-  list_add_tail (&new->list, &out_head);
   return 0;
 }
 

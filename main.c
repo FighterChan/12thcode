@@ -146,6 +146,8 @@ parse_cmd (FILE *fp)
             {
               strcpy (pesi.type, "ADD-ESI");
 
+              static_count = 0;
+
               char tmpbuf[1024];
               memset (tmpbuf, 0, sizeof(tmpbuf));
 
@@ -297,8 +299,8 @@ deal_with_cmd (FILE *fp)
                       strcpy (stab.nexthop, pout->peerip);
                     }
                   stab.flg = 0;
-                  stab.set.type = tmp.type;
                   stab.set.val = tmp.val;
+                  stab.set.type = tmp.type;
                   add_out_tab (&stab);
                 }
             }
@@ -308,46 +310,51 @@ deal_with_cmd (FILE *fp)
   /*遍历2*/
   list_for_each_entry_safe(pin,nin,&mac_head,list)
     {
-      list_for_each_entry_safe(pesi,nesi,&esi_head,list)
         {
           if (strcmp (pin->nexthoptype, "ESI") == 0)
             {
 //              printf ("pesi->name:%s\n", pesi->name);
 //              printf ("pin->nexthop:%s\n", pin->nexthop);
-
-              if (strcmp (pesi->name, pin->nexthop) == 0)
+              list_for_each_entry_safe(pesi,nesi,&esi_head,list)
                 {
-                  fid2mac_type (pin->fid, &tmp);
-                  memset (buf, 0, sizeof(buf));
-                  vid_vni_show (&tmp, buf);
-
-                  /*赋值*/
-                  strcpy (stab.strfid, buf);
-                  strcpy (stab.macaddress, pin->macaddress);
-                  strcpy (stab.source, pin->source);
-                  int i;
-                  for (i = 0; i < static_count; ++i)
+                  if (strcmp (pesi->name, pin->nexthop) == 0)
                     {
-                      list_for_each_entry_safe(pout,nout,&int_head,list)
+                      fid2mac_type (pin->fid, &tmp);
+                      memset (buf, 0, sizeof(buf));
+                      vid_vni_show (&tmp, buf);
+
+                      /*赋值*/
+                      strcpy (stab.strfid, buf);
+                      strcpy (stab.macaddress, pin->macaddress);
+                      strcpy (stab.source, pin->source);
+                      int i;
+
+                      for (i = 0; i < static_count; ++i)
                         {
-                          if (pout->ifx == pesi->nexthopifx[i])
+                          list_for_each_entry_safe(pout,nout,&int_head,list)
                             {
-                              if (strcmp (pout->inttype, "ETHERNET") == 0)
+                              if (pout->ifx == pesi->nexthopifx[i])
                                 {
-                                  strcpy (stab.nexthop, pout->ifname);
+                                  if (strcmp (pout->inttype, "ETHERNET") == 0)
+                                    {
+                                      strcpy (stab.nexthop, pout->ifname);
+                                    }
+                                  else if (strcmp (pout->inttype, "TUNNEL")
+                                      == 0)
+                                    {
+                                      strcpy (stab.nexthop, pout->peerip);
+                                    }
+                                  /*添加out_table*/
+                                  stab.flg = 1;
+                                  stab.set.val = tmp.val;
+                                  stab.set.type = tmp.type;
+                                  add_out_tab (&stab);
                                 }
-                              else if (strcmp (pout->inttype, "TUNNEL") == 0)
-                                {
-                                  strcpy (stab.nexthop, pout->peerip);
-                                }
-                              /*添加out_table*/
-                              stab.flg = 1;
-                              add_out_tab (&stab);
                             }
+
                         }
 
                     }
-
                 }
             }
 
@@ -365,24 +372,24 @@ show (FILE *fp)
 
   list_for_each_entry_safe(p,n,&out_head,list)
     {
-      if (p->flg != 0)
-        {
-          if (i == 0)
-            {
-              fprintf (fp, "%s %s %s %s\n", p->strfid, p->macaddress, p->source,
-                       p->nexthop);
-            }
-          else
-            {
-              fprintf (fp, "                         %s\n", p->nexthop);
-            }
-          i++;
-        }
-      else
-        {
-          fprintf (fp, "%s %s %s %s\n", p->strfid, p->macaddress, p->source,
-                   p->nexthop);
-        }
+//      if (p->flg != 0)
+//        {
+//          if (i == 0)
+//            {
+//              fprintf (fp, "%s %s %s %s\n", p->strfid, p->macaddress, p->source,
+//                       p->nexthop);
+//            }
+//          else
+//            {
+//              fprintf (fp, "                         %s\n", p->nexthop);
+//            }
+//          i++;
+//        }
+//      else
+//        {
+          fprintf (fp, "%s %s %s %s %d\n", p->strfid, p->macaddress, p->source,
+                   p->nexthop,p->set.type);
+//        }
     }
 }
 

@@ -12,6 +12,7 @@
 #include "tools.h"
 
 #define MAX(X,Y) ((X)>(Y)?(X):(Y))
+#define MIN(X,Y) ((X)<(Y)?(X):(Y))
 
 #define TYPE_LEN 16
 #define ROTO_LEN 16
