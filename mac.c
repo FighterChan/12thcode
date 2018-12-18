@@ -443,6 +443,7 @@ check_mac_in (struct mac_in *p, int add_del)
       return -1;
     }
   /*检查proto是否合法*/
+  valid = -1;
   int i;
   for (i = 0; strproto[i] != NULL; i++)
     {
@@ -454,12 +455,12 @@ check_mac_in (struct mac_in *p, int add_del)
         }
 
     }
-//  if (valid != 0)
-//    {
-//      return -1;
-//    }
+  if (valid < 0)
+    {
+      return -1;
+    }
   /*检查source是否合法*/
-//  valid = 0;
+  valid = -1;
   for (i = 0; strsource[i] != NULL; i++)
     {
       if (strcmp (p->source, strsource[i]) == 0)
@@ -469,10 +470,6 @@ check_mac_in (struct mac_in *p, int add_del)
           break;
         }
     }
-//  if (valid != 0)
-//    {
-//      return -1;
-//    }
 
   if (valid < 0)
     {
@@ -482,7 +479,7 @@ check_mac_in (struct mac_in *p, int add_del)
   if (add_del == _ADD)
     {
       /*检查nexthoptype是否合法*/
-      valid = 0;
+      valid = -1;
       for (i = 0; strnexthoptype[i] != NULL; i++)
         {
           if (strcmp (p->nexthoptype, strnexthoptype[i]) == 0)
@@ -492,10 +489,10 @@ check_mac_in (struct mac_in *p, int add_del)
               break;
             }
         }
-//      if (valid != 0)
-//        {
-//          return -1;
-//        }
+      if (valid < 0)
+        {
+          return -1;
+        }
 
       /*检查nexthop是否合法*/
       if (strcmp (p->nexthoptype, "INTERFACE") == 0)
