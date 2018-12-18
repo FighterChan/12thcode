@@ -129,6 +129,12 @@ free_list (void);
 int
 sort_out_tab (struct out_tab *new);
 
+struct int_out *
+look_up_by_intkey (int ifx);
+
+struct esi *
+look_up_by_esikey (const char *name);
+
 void
 insert_sort (struct list_head *head, int
 (*cmp) (struct list_head *a, struct list_head *b));

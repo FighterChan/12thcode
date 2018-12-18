@@ -14,6 +14,7 @@
 #include <string.h>
 #include "mac.h"
 #include "tools.h"
+#include "list.h"
 
 char *strproto[8] =
   { "VXLAN", "DOT1Q", NULL };
@@ -74,7 +75,7 @@ add_mac_in (struct mac_in *s)
 {
   struct mac_in *p = NULL;
   struct mac_in *n;
-  p = look_up_mac_in (s);
+//  p = look_up_mac_in (s);
   if (p == NULL)
     {
       p = (struct mac_in *) malloc (sizeof(struct mac_in));
@@ -473,7 +474,7 @@ check_mac_in (struct mac_in *p, int add_del)
 //      return -1;
 //    }
 
-  if(valid < 0)
+  if (valid < 0)
     {
       return -1;
     }
@@ -514,6 +515,36 @@ check_mac_in (struct mac_in *p, int add_del)
 
     }
   return 0;
+}
+
+/*根据key:ifx查找接口节点*/
+struct int_out *
+look_up_by_intkey (int ifx)
+{
+  struct int_out *p, *n;
+  list_for_each_entry_safe (p, n, &int_head,list)
+    {
+      if (p->ifx == ifx)
+        {
+          return p;
+        }
+    }
+  return NULL;
+}
+
+/*根据key:name查找接口ESI节点*/
+struct esi *
+look_up_by_esikey (const char *name)
+{
+  struct esi *p, *n;
+  list_for_each_entry_safe (p, n, &esi_head,list)
+    {
+      if (strcmp(p->name,name) == 0)
+        {
+          return p;
+        }
+    }
+  return NULL;
 }
 
 int

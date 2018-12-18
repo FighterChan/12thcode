@@ -267,97 +267,90 @@ deal_with_cmd (FILE *fp)
   struct int_out *pout, *nout;
   struct esi *pesi, *nesi;
   char buf[32];
+  int nRet = 0;
 
-  int next_hop = 0;
   memset (&stab, 0, sizeof(struct out_tab));
 
   struct mac_type tmp;
   memset (&tmp, 0, sizeof(struct mac_type));
-  /*遍历int*/
-  list_for_each_entry_safe(pout,nout,&int_head,list)
-    {
-      list_for_each_entry_safe(pin,nin,&mac_head,list)
-        {
-          if (strcmp (pin->nexthoptype, "INTERFACE") == 0)
-            {
-              next_hop = atoi (pin->nexthop);
-              if (pout->ifx == next_hop)
-                {
-                  fid2mac_type (pin->fid, &tmp);
-                  memset (buf, 0, sizeof(buf));
-                  vid_vni_show (&tmp, buf);
-                  /*赋值*/
-                  strcpy (stab.strfid, buf);
-                  strcpy (stab.macaddress, pin->macaddress);
-                  strcpy (stab.source, pin->source);
-                  if (strcmp (pout->inttype, "ETHERNET") == 0)
-                    {
-                      strcpy (stab.nexthop, pout->ifname);
-                    }
-                  else if (strcmp (pout->inttype, "TUNNEL") == 0)
-                    {
-                      strcpy (stab.nexthop, pout->peerip);
-                    }
-                  stab.flg = 0;
-                  stab.set.val = tmp.val;
-                  stab.set.type = tmp.type;
-                  add_out_tab (&stab);
-                }
-            }
-        }
-    }
 
-  /*遍历2*/
+  /*遍历mac_in*/
   list_for_each_entry_safe(pin,nin,&mac_head,list)
     {
+      nRet = fid2mac_type (pin->fid, &tmp);
+      printf("\n++++++++++++++++++\n");
+      printf("fid=%d,tmp->type:%d,tmp->val:%d\n",pin->fid,tmp.type,tmp.val);
+      printf("\n++++++++++++++++++\n");
+      if (nRet < 0)
         {
-          if (strcmp (pin->nexthoptype, "ESI") == 0)
+          continue;
+        }
+      if (strcmp (pin->nexthoptype, "INTERFACE") == 0)
+        {
+          pout = look_up_by_intkey (atoi (pin->nexthop));
+          if (!pout)
             {
-//              printf ("pesi->name:%s\n", pesi->name);
-//              printf ("pin->nexthop:%s\n", pin->nexthop);
-              list_for_each_entry_safe(pesi,nesi,&esi_head,list)
-                {
-                  if (strcmp (pesi->name, pin->nexthop) == 0)
-                    {
-                      fid2mac_type (pin->fid, &tmp);
-                      memset (buf, 0, sizeof(buf));
-                      vid_vni_show (&tmp, buf);
-
-                      /*赋值*/
-                      strcpy (stab.strfid, buf);
-                      strcpy (stab.macaddress, pin->macaddress);
-                      strcpy (stab.source, pin->source);
-                      int i;
-
-                      for (i = 0; i < static_count; ++i)
-                        {
-                          list_for_each_entry_safe(pout,nout,&int_head,list)
-                            {
-                              if (pout->ifx == pesi->nexthopifx[i])
-                                {
-                                  if (strcmp (pout->inttype, "ETHERNET") == 0)
-                                    {
-                                      strcpy (stab.nexthop, pout->ifname);
-                                    }
-                                  else if (strcmp (pout->inttype, "TUNNEL")
-                                      == 0)
-                                    {
-                                      strcpy (stab.nexthop, pout->peerip);
-                                    }
-                                  /*添加out_table*/
-                                  stab.flg = 1;
-                                  stab.set.val = tmp.val;
-                                  stab.set.type = tmp.type;
-                                  add_out_tab (&stab);
-                                }
-                            }
-
-                        }
-
-                    }
-                }
+              /*mac表项出口不存在，怎么处理？*/
+              //删除？？
+              continue;
             }
+          memset (buf, 0, sizeof(buf));
+          vid_vni_show (&tmp, buf);
+          strcpy (stab.strfid, buf);
+          strcpy (stab.macaddress, pin->macaddress);
+          strcpy (stab.source, pin->source);
+          if (strcmp (pout->inttype, "ETHERNET") == 0)
+            {
+              strcpy (stab.nexthop, pout->ifname);
+            }
+          else if (strcmp (pout->inttype, "TUNNEL") == 0)
+            {
+              strcpy (stab.nexthop, pout->peerip);
+            }
+          stab.flg = 0;
+          stab.set.val = tmp.val;
+          stab.set.type = tmp.type;
+          add_out_tab (&stab);
+        }
+      else if (strcmp (pin->nexthoptype, "ESI") == 0)
+        {
+          pesi = look_up_by_esikey (pin->nexthop);
+          if (!pesi)
+            {
+              /*mac表项出口不存在，怎么处理？*/
+              //删除？？
+              continue;
+            }
+          memset (buf, 0, sizeof(buf));
+          vid_vni_show (&tmp, buf);
+          strcpy (stab.strfid, buf);
+          strcpy (stab.macaddress, pin->macaddress);
+          strcpy (stab.source, pin->source);
+          int i;
+          for (i = 0; i < static_count; ++i)
+            {
+              pout = look_up_by_intkey (pesi->nexthopifx[i]);
+              if (!pout)
+                {
+                  /*mac表项出口不存在，怎么处理？*/
+                  //删除？？
+                  continue;
+                }
 
+              if (strcmp (pout->inttype, "ETHERNET") == 0)
+                {
+                  strcpy (stab.nexthop, pout->ifname);
+                }
+              else if (strcmp (pout->inttype, "TUNNEL") == 0)
+                {
+                  strcpy (stab.nexthop, pout->peerip);
+                }
+              /*添加out_table*/
+              stab.flg = 1;
+              stab.set.val = tmp.val;
+              stab.set.type = tmp.type;
+              add_out_tab (&stab);
+            }
         }
     }
 
@@ -402,7 +395,7 @@ show (FILE *fp)
         }
 #else
       fprintf (fp, "%s %s %s %s\n", p->strfid, p->macaddress, p->source,
-               p->nexthop);
+          p->nexthop);
 #endif
     }
 }
