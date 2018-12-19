@@ -132,8 +132,8 @@ parse_cmd (FILE *fp)
                   memcpy (pint_out.peerip, sint_out.peerip + 1,
                           strlen (sint_out.peerip) - 2);
                 }
-              /*检查ifx是否合法*/
-              valid = check_ifx_nexthop (pint_out.ifx);
+              /*检查int_out是否合法*/
+              valid = check_int_out (&pint_out);
               if (valid < 0)
                 {
                   valid = 0;

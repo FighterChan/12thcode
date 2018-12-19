@@ -63,16 +63,6 @@ fid2mac_type (int fid, struct mac_type *p)
 }
 
 int
-check_ifx_nexthop (int ifx)
-{
-  if (ifx < 1 || ifx > 65535)
-    {
-      return -1;
-    }
-  return 0;
-}
-
-int
 conver_filename (char *infile, char *outfile)
 {
 

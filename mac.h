@@ -92,6 +92,10 @@ add_mac_in (struct mac_in *s);
 int
 del_mac_in (struct mac_in *s);
 int
+check_ifx_nexthop (int ifx);
+int
+check_int_out (struct int_out *p);
+int
 check_mac_in (struct mac_in *p, int add_del);
 u32
 get_mac_in_key (int fid, const char *mac_addr);

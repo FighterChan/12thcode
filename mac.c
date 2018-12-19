@@ -25,6 +25,9 @@ char *strsource[8] =
 char *strnexthoptype[16] =
   { "INTERFACE", "ESI", NULL };
 
+char *strinttype[16] =
+  { "ETHERNET", "TUNNEL", NULL };
+
 int
 copy_to_mac_in (struct mac_in *p, struct mac_in *s)
 {
@@ -426,12 +429,47 @@ sort_out_tab (struct out_tab *new)
   return 0;
 }
 
+int
+check_ifx_nexthop (int ifx)
+{
+  if (ifx < 1 || ifx > 65535)
+    {
+      return -1;
+    }
+  return 0;
+}
+
+int
+check_int_out (struct int_out *p)
+{
+  int valid;
+  int i;
+  valid = -1;
+  for (i = 0; strinttype[i] != NULL; ++i)
+    {
+      if (strcmp (p->inttype, strinttype[i]) == 0)
+        {
+          valid = 0;
+          break;
+        }
+    }
+  if (valid < 0)
+    {
+      printf("\n====================================inttype valid\n");
+      return -1;
+    }
+  if (check_ifx_nexthop (p->ifx) < 0)
+    {
+      return -1;
+    }
+  return 0;
+}
+
 /* 过滤不合法的输入参数 */
 int
 check_mac_in (struct mac_in *p, int add_del)
 {
-  int valid;
-  valid = 0;
+  int valid = 0;
   struct mac_type tmp;
   memset (&tmp, 0, sizeof(struct mac_type));
 
@@ -536,7 +574,7 @@ look_up_by_esikey (const char *name)
   struct esi *p, *n;
   list_for_each_entry_safe (p, n, &esi_head,list)
     {
-      if (strcmp(p->name,name) == 0)
+      if (strcmp (p->name, name) == 0)
         {
           return p;
         }
