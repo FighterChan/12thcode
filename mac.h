@@ -79,12 +79,6 @@ struct out_tab
   struct list_head list;
 };
 
-/*全局变量*/
-struct list_head mac_head;
-struct list_head int_head;
-struct list_head esi_head;
-struct list_head out_head;
-
 int
 copy_to_mac_in (struct mac_in *p, struct mac_in *s);
 int
@@ -155,5 +149,14 @@ cmp_proto_type (struct list_head *a, struct list_head *b);
 void
 bubble_sort (struct list_head *head, int
 (*compar) (struct list_head *, struct list_head *));
+
+int
+parse_cmd (FILE *fp);
+void
+vid_vni_show (struct mac_type *tmp, char *p);
+int
+deal_with_cmd (FILE *fp);
+void
+show (FILE *fp);
 
 #endif /* MAC_H_ */
