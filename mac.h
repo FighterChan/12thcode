@@ -37,12 +37,18 @@ enum
   _ADD, _DEL
 };
 
+struct src {
+  char source[SOURCE_LEN];
+  struct list_head list;
+};
+
 struct mac_in
 {
   char type[TYPE_LEN];
   char proto[ROTO_LEN];
-  char source[SOURCE_LEN];
   int fid;
+  char source[SOURCE_LEN];
+  struct list_head src_head;
   char macaddress[MACADDRESS_LEN];
   char nexthoptype[NEXTHOPTYPE_LEN];
   char nexthop[NEXTHOP_LEN];

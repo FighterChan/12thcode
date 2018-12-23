@@ -53,39 +53,16 @@ struct mac_in *
 look_up_mac_in (struct mac_in *s)
 {
 
-  struct mac_in *p, *new;
-  struct mac_in *n;
-  u32 key, keytmp;
-  key = get_mac_in_key (s->fid, s->macaddress);
-  printf ("mackey = %ld\n", key);
-  list_for_each_entry_safe(p, n, &mac_head,list)
-    {
-      keytmp = get_mac_in_key (p->fid, p->macaddress);
-      if (key == keytmp)
-        {
-          if (strcmp (p->source, "STATIC") == 0)
-            {
-              /*优先级最高，不更新*/
-              return p;
-            }
-          else
-            {
-              /*后来者优先级较高，更新*/
-              copy_to_mac_in (p, s);
-              return p;
-            }
-
-        }
-    }
   return NULL;
 }
 
 int
 add_mac_in (struct mac_in *s)
 {
-  struct mac_in *p = NULL;
-  struct mac_in *n;
+  struct mac_in *p, *n;
 //  p = look_up_mac_in (s);
+
+
   if (p == NULL)
     {
       p = (struct mac_in *) malloc (sizeof(struct mac_in));
@@ -93,8 +70,44 @@ add_mac_in (struct mac_in *s)
         {
           return -1;
         }
+
+      if (list_empty (&mac_head))
+        {
+          INIT_LIST_HEAD (&p->src_head);
+        }
+      struct src *psrc;
+      psrc = (struct src *) malloc (sizeof(struct src));
+      if (!psrc)
+        {
+          return -1;
+        }
+
+      strcpy (psrc->source, s->source);
+      list_add_tail (&psrc->list, &p->src_head);
+
+      printf("===============>>>>%s\n",psrc->source);
+      struct src *ssrc;
+      list_for_each_entry(ssrc,&p->src_head,list)
+        {
+          if (strcmp (ssrc->source, "STATIC") == 0)
+            {
+              strcpy (p->source, ssrc->source);
+              copy_to_mac_in (p, s);
+              list_add_tail (&p->list, &mac_head);
+//              list_del_init (&ssrc->list);
+//              free (ssrc);
+//              ssrc = NULL;
+              return 0;
+            }
+        }
+      ssrc = NULL;
+      ssrc = list_last_entry(&p->src_head, struct src, list);
+      strcpy (p->source, ssrc->source);
       copy_to_mac_in (p, s);
       list_add_tail (&p->list, &mac_head);
+//      list_del_init (&ssrc->list);
+//      free (ssrc);
+//      ssrc = NULL;
       return 0;
     }
   else
@@ -776,8 +789,8 @@ parse_cmd (FILE *fp)
                   continue;
                 }
 
-              add_mac_in (&pmac_in);
-
+              nRet = add_mac_in (&pmac_in);
+              printf("nRet = %d\n",nRet);
             }
           else if (strcmp (type, "\"ADD-INT\",") == 0)
             {
